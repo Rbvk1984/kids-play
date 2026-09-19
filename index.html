@@ -463,7 +463,13 @@
     if(p.length<6){e.textContent="Password needs at least 6 characters! 🔒";return;}
     b.disabled=true; b.textContent="Creating your world... 🌟"; e.textContent="";
     try { await register({username:u,displayName:n,password:p,gradeId:g,avatarType:selectedAvatar}); window.location.href="pages/dashboard.html"; }
-    catch(err){ e.textContent=err.message?.includes("already")?"Username taken! Try another 💜":"Something went wrong. Try again! 💜"; b.disabled=false; b.innerHTML="🌟 Create My Account!"; }
+    catch(err){
+      console.error("Registration error:", err);
+      if(err.message?.includes("already registered") || err.message?.includes("already been registered")) e.textContent="That username is already taken! Try another one 💜";
+      else if(err.message?.includes("Password")) e.textContent="Password must be at least 6 characters 🔒";
+      else e.textContent="Could not create account: " + (err.message || "Unknown error") + " — try again 💜";
+      b.disabled=false; b.innerHTML="🌟 Create My Account!";
+    }
   };
 
   document.addEventListener("keydown", e => {
