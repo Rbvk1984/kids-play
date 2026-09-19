@@ -14,7 +14,7 @@
   <a href="dashboard.html" class="kp-logo" style="font-size:1.1rem;">🎮 Kids Play</a>
   <div class="kp-header-right">
     <span id="header-topic" style="font-weight:800; color:var(--primary); font-size:0.9rem;"></span>
-    <button class="btn btn-ghost" style="padding:7px 14px; font-size:0.82rem;" onclick="if(confirm('Leave the game? Your progress will be lost! 😢')) window.location.href='dashboard.html'">✕ Quit</button>
+    <button class="btn btn-ghost" style="padding:7px 14px;font-size:0.82rem;" onclick="if(confirm('Leave the game? Your progress will be lost! 😢')) window.location.href='dashboard.html'">✕ Quit</button>
   </div>
 </header>
 
@@ -27,11 +27,12 @@
   <div class="game-stats">
     <div class="game-stat"><span class="stat-icon">❓</span><span id="stat-question">1 / 10</span></div>
     <div class="game-stat"><span class="stat-icon">⭐</span><span id="stat-score">0</span></div>
-    <div class="game-stat" id="streak-stat" style="display:none">
-      <span class="stat-icon">🔥</span><span id="stat-streak">0</span>
-    </div>
+    <div class="game-stat" id="streak-stat" style="display:none"><span class="stat-icon">🔥</span><span id="stat-streak">0</span></div>
     <div class="game-stat"><span class="stat-icon">✅</span><span id="stat-correct">0</span></div>
   </div>
+
+  <!-- Topic illustration panel -->
+  <div class="topic-illustration" id="topic-illustration"></div>
 
   <div class="question-card" id="question-card">
     <div class="question-meta" id="q-meta">Question 1 of 10</div>
@@ -48,7 +49,7 @@
     Next Question ✨
   </button>
 
-  <div class="empty-state hidden" id="load-state">
+  <div class="empty-state hidden" id="load-state" style="color:white;">
     <div class="empty-state-emoji" id="load-emoji">⏳</div>
     <div class="empty-state-text" id="load-text">Loading your magical questions...</div>
   </div>
@@ -57,16 +58,18 @@
 
 <script type="module">
   import { requireAuth } from "../js/guard.js";
-  import { loadQuestions, checkAnswer, getCorrectOptionText } from "../js/engines/questionEngine.js";
+  import { questionLoader, checkAnswer, getCorrectOptionText } from "../js/engines/questionEngine.js";
   import { calculatePoints, updateStreak, buildSessionResult } from "../js/engines/scoringEngine.js";
   import { saveSession, saveAnswers, updateProgress } from "../js/engines/progressEngine.js";
   import { initSparkles } from "../js/avatars.js";
+  import { getTopicIllustration } from "../js/topicIllustrations.js";
 
-  initSparkles(10);
+  initSparkles(8);
 
   let profile, topic, subject, questions = [];
   let current = 0, score = 0, streak = 0, bestStreak = 0, correctCount = 0;
   let answers = [], answered = false;
+  const startTime = {};
 
   (async () => {
     const auth = await requireAuth();
@@ -78,11 +81,19 @@
     if (!topic || !subject) { window.location.href = "dashboard.html"; return; }
 
     document.getElementById("header-topic").textContent = `${subject.emoji} ${topic.name}`;
+
+    // Show topic illustration immediately (no loading needed — it's pure CSS/SVG)
+    document.getElementById("topic-illustration").innerHTML = getTopicIllustration(topic.name);
+
+    // Trigger preload if not already started
+    questionLoader.preload(topic.id, profile.id);
+
     showState("loading");
 
     try {
-      questions = await loadQuestions(topic.id, 10);
-      if (!questions.length) throw new Error("No questions found.");
+      // getGameQuestions() returns instantly if preload finished, otherwise waits minimally
+      questions = await questionLoader.getGameQuestions();
+      if (!questions?.length) throw new Error("No questions found for this topic yet.");
       hideState();
       renderQuestion();
     } catch (err) {
@@ -91,7 +102,7 @@
   })();
 
   function renderQuestion() {
-    const q = questions[current];
+    const q     = questions[current];
     const total = questions.length;
 
     document.getElementById("stat-question").textContent = `${current + 1} / ${total}`;
@@ -107,6 +118,7 @@
     fb.classList.remove("show","correct","wrong");
     document.getElementById("next-btn").classList.add("hidden");
     answered = false;
+    startTime[current] = Date.now();
 
     const grid = document.getElementById("options-grid");
     grid.innerHTML = "";
@@ -124,15 +136,16 @@
     if (answered) return;
     answered = true;
 
-    const q         = questions[current];
-    const isCorrect = checkAnswer(q, selectedLetter);
-    streak = updateStreak(isCorrect, streak);
+    const q           = questions[current];
+    const isCorrect   = checkAnswer(q, selectedLetter);
+    const timeTaken   = Math.round((Date.now() - (startTime[current] || Date.now())) / 1000);
+    streak            = updateStreak(isCorrect, streak);
     if (streak > bestStreak) bestStreak = streak;
-    const points = calculatePoints(isCorrect, streak);
-    score += points;
+    const points      = calculatePoints(isCorrect, streak);
+    score            += points;
     if (isCorrect) correctCount++;
 
-    answers.push({ questionId: q.id, playerAnswer: selectedLetter, isCorrect, pointsEarned: points });
+    answers.push({ questionId: q.id, playerAnswer: selectedLetter, isCorrect, pointsEarned: points, timeTaken });
 
     document.querySelectorAll(".option-btn").forEach(btn => {
       btn.disabled = true;
@@ -140,13 +153,9 @@
       else if (btn.dataset.letter === selectedLetter && !isCorrect) btn.classList.add("wrong");
     });
 
-    if (isCorrect) {
-      showScorePop(`+${points}`);
-      burstStars();
-    }
+    if (isCorrect) { showScorePop(`+${points}`); burstStars(); }
 
     showFeedback(q, selectedLetter, isCorrect, points, streak);
-
     document.getElementById("stat-score").textContent   = score;
     document.getElementById("stat-streak").textContent  = streak;
     document.getElementById("streak-stat").style.display = streak >= 2 ? "flex" : "none";
@@ -154,9 +163,7 @@
 
     const nextBtn = document.getElementById("next-btn");
     nextBtn.classList.remove("hidden");
-    nextBtn.innerHTML = current + 1 >= questions.length
-      ? "🏆 See My Results!"
-      : "Next Question ✨";
+    nextBtn.innerHTML = current + 1 >= questions.length ? "🏆 See My Results!" : "Next Question ✨";
   }
 
   function showFeedback(q, selectedLetter, isCorrect, points, newStreak) {
@@ -164,20 +171,17 @@
     const title = document.getElementById("feedback-title");
     const body  = document.getElementById("feedback-body");
     const expl  = document.getElementById("feedback-explanation");
-
     fb.classList.remove("correct","wrong");
     fb.classList.add("show", isCorrect ? "correct" : "wrong");
-
     if (isCorrect) {
       title.className = "feedback-title correct";
-      const msgs = ["Brilliant! 🌟", "Amazing! ⭐", "Fantastic! 💫", "Super! 🎉", "Wonderful! ✨"];
+      const msgs = ["Brilliant! 🌟","Amazing! ⭐","Fantastic! 💫","Super! 🎉","Wonderful! ✨","Great job! 🌸"];
       const streakMsg = newStreak >= 3 ? ` · 🔥 ${newStreak} in a row!` : "";
-      title.innerHTML = `${msgs[Math.floor(Math.random()*msgs.length)]} <span style="font-size:0.85rem; font-weight:700;">+${points} pts${streakMsg}</span>`;
+      title.innerHTML = `${msgs[Math.floor(Math.random()*msgs.length)]} <span style="font-size:0.85rem;font-weight:700;">+${points} pts${streakMsg}</span>`;
       body.textContent = "";
     } else {
       title.className = "feedback-title wrong";
-      const msgs = ["Not quite! 💜", "Almost! 💜", "Keep trying! 💜"];
-      title.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+      title.textContent = ["Not quite! 💜","Almost there! 💜","Keep trying! 💜"][Math.floor(Math.random()*3)];
       const correctText = getCorrectOptionText(q);
       body.innerHTML = `<div style="margin-bottom:4px">The answer was: <strong style="color:var(--correct)">${q.correct_answer}) ${correctText}</strong></div>`;
     }
@@ -186,31 +190,24 @@
 
   window.nextQuestion = async function() {
     current++;
-    if (current >= questions.length) {
-      await finishGame();
-    } else {
-      renderQuestion();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    if (current >= questions.length) await finishGame();
+    else { renderQuestion(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
 
   async function finishGame() {
     const result = buildSessionResult({ score, correctCount, incorrectCount: current - correctCount, bestStreak });
-    try {
-      const session = await saveSession({ playerId: profile.id, topicId: topic.id, result });
-      if (session) {
-        await saveAnswers(session.id, answers);
-        await updateProgress({ playerId: profile.id, subjectId: subject.id, topicId: topic.id, result });
-      }
-    } catch (err) { console.warn("Could not save:", err); }
+    // Save asynchronously — don't block the results screen
+    Promise.all([
+      saveSession({ playerId: profile.id, topicId: topic.id, result })
+        .then(session => session ? Promise.all([
+          saveAnswers(session.id, answers),
+          updateProgress({ playerId: profile.id, subjectId: subject.id, topicId: topic.id, result }),
+        ]) : null),
+    ]).catch(err => console.warn("Save error (non-blocking):", err));
 
     sessionStorage.setItem("kp_result", JSON.stringify({
-      ...result,
-      topicName: topic.name,
-      subjectName: subject.name,
-      subjectEmoji: subject.emoji,
-      avatarType: profile.avatar_type,
-      displayName: profile.display_name,
+      ...result, topicName: topic.name, subjectName: subject.name,
+      subjectEmoji: subject.emoji, avatarType: profile.avatar_type, displayName: profile.display_name,
     }));
     window.location.href = "results.html";
   }
@@ -219,33 +216,35 @@
     const el = document.createElement("div");
     el.className = "score-pop";
     el.textContent = text;
-    el.style.cssText = `left:${35 + Math.random()*30}%; bottom:${30 + Math.random()*15}%;`;
+    el.style.cssText = `left:${35+Math.random()*30}%;bottom:${30+Math.random()*15}%;`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1250);
   }
 
   function burstStars() {
-    const emojis = ["⭐","✨","🌟","💫","🎉"];
-    for (let i = 0; i < 6; i++) {
+    const emojis = ["⭐","✨","🌟","💫","🎉","🌸","💜"];
+    for (let i = 0; i < 7; i++) {
       setTimeout(() => {
         const el = document.createElement("div");
-        el.style.cssText = `position:fixed; pointer-events:none; z-index:999; font-size:${0.8+Math.random()*0.6}rem; left:${20+Math.random()*60}%; top:${20+Math.random()*50}%; animation: confettiFall ${0.8+Math.random()*0.6}s ease-out forwards;`;
+        el.style.cssText = `position:fixed;pointer-events:none;z-index:999;font-size:${0.9+Math.random()*0.6}rem;left:${20+Math.random()*60}%;top:${20+Math.random()*50}%;animation:confettiFall ${0.7+Math.random()*0.6}s ease-out forwards;`;
         el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 1200);
-      }, i * 80);
+      }, i * 70);
     }
   }
 
   function showState(type, emoji, text) {
     document.getElementById("question-card").classList.add("hidden");
+    document.getElementById("topic-illustration").classList.add("hidden");
     const el = document.getElementById("load-state");
     el.classList.remove("hidden");
-    document.getElementById("load-emoji").textContent = type === "loading" ? "⏳" : (emoji || "😅");
-    document.getElementById("load-text").textContent  = type === "loading" ? "Loading your magical questions..." : (text || "Something went wrong.");
+    document.getElementById("load-emoji").textContent = type==="loading" ? "⏳" : (emoji||"😅");
+    document.getElementById("load-text").textContent  = type==="loading" ? "Loading your magical questions..." : (text||"Something went wrong.");
   }
   function hideState() {
     document.getElementById("question-card").classList.remove("hidden");
+    document.getElementById("topic-illustration").classList.remove("hidden");
     document.getElementById("load-state").classList.add("hidden");
   }
 </script>

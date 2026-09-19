@@ -186,6 +186,17 @@
         sessionStorage.setItem("kp_subject", JSON.stringify(subject));
         window.location.href = "game.html";
       });
+      // START PRELOADING the moment the user hovers or touches the card
+      card.addEventListener("mouseenter", () => {
+        import("../js/engines/questionEngine.js").then(({ questionLoader }) => {
+          questionLoader.preload(topic.id, profile.id);
+        });
+      });
+      card.addEventListener("touchstart", () => {
+        import("../js/engines/questionEngine.js").then(({ questionLoader }) => {
+          questionLoader.preload(topic.id, profile.id);
+        });
+      }, { passive: true });
       list.appendChild(card);
     });
   }
