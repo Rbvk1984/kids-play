@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kids Play ✨ — Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    /* Grade filter tabs */
+    .grade-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+    .grade-tab {
+      padding:8px 18px; border-radius:999px; font-weight:800; font-size:0.85rem;
+      cursor:pointer; border:2.5px solid var(--border); background:#fff;
+      color:var(--text-muted); transition:all 0.15s; font-family:"Nunito",sans-serif;
+    }
+    .grade-tab.active { background:linear-gradient(135deg,var(--primary),var(--secondary)); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(214,51,132,0.3); }
+
+    /* Podium */
+    .podium { display:flex; align-items:flex-end; justify-content:center; gap:10px; margin-bottom:28px; }
+    .podium-col { display:flex; flex-direction:column; align-items:center; }
+    .podium-avatar { font-size:2.4rem; margin-bottom:6px; }
+    .podium-name { font-weight:900; font-size:0.82rem; color:var(--text); text-align:center; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .podium-score { font-family:"Fredoka One",cursive; font-size:1.1rem; color:var(--primary); }
+    .podium-block { display:flex; align-items:center; justify-content:center; width:72px; border-radius:12px 12px 0 0; font-family:"Fredoka One",cursive; font-size:1.6rem; color:#fff; }
+    .p1 .podium-block { background:linear-gradient(135deg,#f59e0b,#d97706); height:90px; }
+    .p2 .podium-block { background:linear-gradient(135deg,#9ca3af,#6b7280); height:68px; }
+    .p3 .podium-block { background:linear-gradient(135deg,#b45309,#92400e); height:52px; }
+
+    /* Player list */
+    .player-row {
+      background:#fff; border-radius:var(--r-sm); padding:12px 16px; margin-bottom:8px;
+      display:flex; align-items:center; gap:12px; border:2px solid var(--border);
+      box-shadow:var(--shadow-sm); transition:transform 0.12s;
+    }
+    .player-row.me { border-color:var(--primary); background:rgba(253,228,236,0.4); }
+    .player-row:hover { transform:translateY(-1px); }
+    .rank-num { font-family:"Fredoka One",cursive; font-size:1.3rem; color:var(--text-muted); width:36px; text-align:center; flex-shrink:0; }
+    .player-av { font-size:2rem; flex-shrink:0; }
+    .player-info { flex:1; }
+    .player-name { font-weight:900; font-size:0.95rem; color:var(--text); }
+    .player-grade { font-size:0.78rem; font-weight:700; color:var(--text-muted); }
+    .player-score { font-family:"Fredoka One",cursive; font-size:1.3rem; color:var(--primary); text-align:right; }
+    .player-acc { font-size:0.75rem; font-weight:800; color:var(--text-muted); text-align:right; }
+    .me-badge { font-size:0.65rem; font-weight:800; background:var(--primary); color:#fff; padding:2px 8px; border-radius:999px; margin-left:6px; }
+  </style>
+</head>
+<body>
+
+<header class="kp-header">
+  <a href="dashboard.html" class="kp-logo" style="font-size:1.1rem;">🎮 Kids Play</a>
+  <div class="kp-header-right">
+    <div id="header-avatar-wrap"></div>
+    <span class="kp-username" id="header-name"></span>
+    <a href="dashboard.html" class="btn btn-ghost" style="padding:7px 14px;font-size:0.82rem;">← Back</a>
+  </div>
+</header>
+
+<div class="page-wrap" style="max-width:680px;">
+  <div class="section-title">🏆 Leaderboard</div>
+  <p class="section-sub">Top learners ranked by total points earned!</p>
+
+  <!-- Grade filter -->
+  <div class="grade-tabs" id="grade-tabs">
+    <button class="grade-tab active" data-grade="0" onclick="loadLeaderboard(0)">🌍 All Grades</button>
+    <button class="grade-tab" data-grade="5" onclick="loadLeaderboard(5)">Grade 5</button>
+    <button class="grade-tab" data-grade="6" onclick="loadLeaderboard(6)">Grade 6</button>
+    <button class="grade-tab" data-grade="7" onclick="loadLeaderboard(7)">Grade 7</button>
+    <button class="grade-tab" data-grade="8" onclick="loadLeaderboard(8)">Grade 8</button>
+  </div>
+
+  <div id="leaderboard-content">
+    <div style="text-align:center; padding:40px;"><div style="font-size:2.5rem">⏳</div><div style="font-weight:800; color:var(--text-muted); margin-top:10px;">Loading leaderboard...</div></div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth }  from "../js/guard.js";
+  import { supabase }     from "../js/supabase.js";
+  import { getAvatar, renderAvatarBadge, initSparkles } from "../js/avatars.js";
+
+  initSparkles(10);
+  let myId = null;
+
+  (async () => {
+    const auth = await requireAuth();
+    if (!auth) return;
+    const { profile } = auth;
+    myId = profile.id;
+
+    const av = getAvatar(profile.avatar_type || "star_princess");
+    document.getElementById("header-avatar-wrap").innerHTML = renderAvatarBadge(av.id, 40);
+    document.getElementById("header-name").textContent = profile.display_name;
+
+    await loadLeaderboard(0);
+  })();
+
+  window.loadLeaderboard = async function(gradeFilter) {
+    // Update tab styles
+    document.querySelectorAll(".grade-tab").forEach(t => {
+      t.classList.toggle("active", Number(t.dataset.grade) === gradeFilter);
+    });
+
+    const el = document.getElementById("leaderboard-content");
+    el.innerHTML = `<div style="text-align:center;padding:40px;"><div style="font-size:2rem">⏳</div></div>`;
+
+    let query = supabase
+      .from("kp_profiles")
+      .select("id, display_name, avatar_type, total_score, grade_id, kp_grades(name)")
+      .order("total_score", { ascending: false })
+      .limit(50);
+
+    if (gradeFilter > 0) query = query.eq("grade_id", gradeFilter);
+
+    const { data: players, error } = await query;
+
+    if (error || !players?.length) {
+      el.innerHTML = `<div style="text-align:center;padding:40px;"><div style="font-size:2.5rem">🌱</div><div style="font-weight:800;color:var(--text-muted);margin-top:10px;">No players yet for this grade!</div><p style="color:var(--text-muted);font-weight:700;font-size:0.85rem;margin-top:4px;">Play some games to appear here ✨</p></div>`;
+      return;
+    }
+
+    // Filter out zero-score players from podium
+    const ranked = players.filter(p => p.total_score > 0);
+    const allPlayers = players; // show everyone in list
+
+    let html = "";
+
+    // Podium (top 3)
+    if (ranked.length >= 1) {
+      const medals = ["🥇","🥈","🥉"];
+      const order  = [1, 0, 2]; // 2nd, 1st, 3rd for visual podium
+      const top3   = ranked.slice(0, 3);
+
+      html += `<div class="podium">`;
+      order.forEach(pos => {
+        if (!top3[pos]) return;
+        const p  = top3[pos];
+        const av = getAvatar(p.avatar_type || "star_princess");
+        html += `<div class="podium-col ${pos===0?"p1":pos===1?"p2":"p3"}">
+          <div class="podium-avatar">${av.emoji}</div>
+          <div class="podium-name">${escHtml(p.display_name)}</div>
+          <div class="podium-score">⭐ ${p.total_score.toLocaleString()}</div>
+          <div class="podium-block">${medals[pos]}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Full ranked list
+    html += `<div>`;
+    allPlayers.forEach((p, i) => {
+      const av    = getAvatar(p.avatar_type || "star_princess");
+      const isMe  = p.id === myId;
+      const grade = p.kp_grades?.name || `Grade ${p.grade_id}`;
+      const rank  = i + 1;
+      const rankDisplay = rank <= 3 && p.total_score > 0
+        ? ["🥇","🥈","🥉"][rank-1]
+        : rank;
+
+      html += `<div class="player-row${isMe?" me":""}">
+        <div class="rank-num">${rankDisplay}</div>
+        <div class="player-av">${av.emoji}</div>
+        <div class="player-info">
+          <div class="player-name">${escHtml(p.display_name)}${isMe?'<span class="me-badge">You!</span>':""}</div>
+          <div class="player-grade">${grade}</div>
+        </div>
+        <div>
+          <div class="player-score">⭐ ${p.total_score.toLocaleString()}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    el.innerHTML = html;
+  };
+
+  function escHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>
