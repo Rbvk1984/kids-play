@@ -3,51 +3,54 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Kids Play — Results!</title>
+  <title>Kids Play ✨ — Results!</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/style.css"/>
 </head>
 <body>
-<div class="page-center" style="flex-direction:column; gap:24px; padding:20px;">
+<div class="page-center" style="flex-direction:column; gap:20px; padding:20px;">
 
   <div class="results-card" id="results-card">
+    <!-- Avatar large -->
+    <div id="result-avatar" style="margin:0 auto 8px; display:flex; justify-content:center;"></div>
+
     <div class="results-emoji" id="results-emoji">🎉</div>
-    <div class="results-title" id="results-title">Game Complete!</div>
+    <div class="results-title" id="results-title">You did it!</div>
     <div class="results-subtitle" id="results-subtitle"></div>
+
+    <!-- Performance message -->
+    <div id="perf-msg" style="background:linear-gradient(135deg,rgba(253,228,236,0.7),rgba(243,232,255,0.7)); border-radius:var(--r-sm); padding:14px 16px; margin-bottom:20px; font-weight:800; font-size:1rem; border:2px solid rgba(214,51,132,0.15); line-height:1.45;"></div>
 
     <div class="stats-grid">
       <div class="stat-block">
-        <div class="stat-value" id="r-score" style="color:var(--primary)">—</div>
-        <div class="stat-label">Score</div>
+        <div class="stat-value" id="r-score">—</div>
+        <div class="stat-label">⭐ Score</div>
       </div>
       <div class="stat-block">
-        <div class="stat-value" id="r-correct" style="color:var(--correct)">—</div>
-        <div class="stat-label">Correct</div>
+        <div class="stat-value" style="color:var(--correct)" id="r-correct">—</div>
+        <div class="stat-label">✅ Correct</div>
       </div>
       <div class="stat-block">
-        <div class="stat-value" id="r-accuracy" style="color:var(--info)">—</div>
-        <div class="stat-label">Accuracy</div>
+        <div class="stat-value" style="color:var(--secondary)" id="r-accuracy">—</div>
+        <div class="stat-label">🎯 Accuracy</div>
       </div>
       <div class="stat-block">
-        <div class="stat-value" id="r-streak" style="color:var(--streak)">—</div>
-        <div class="stat-label">Best Streak 🔥</div>
+        <div class="stat-value" style="color:var(--streak)" id="r-streak">—</div>
+        <div class="stat-label">🔥 Best Streak</div>
       </div>
       <div class="stat-block">
-        <div class="stat-value" id="r-total" style="color:var(--text-muted)">—</div>
-        <div class="stat-label">Questions</div>
+        <div class="stat-value" style="color:var(--text-muted)" id="r-total">—</div>
+        <div class="stat-label">❓ Questions</div>
       </div>
       <div class="stat-block">
-        <div class="stat-value" id="r-wrong" style="color:var(--wrong)">—</div>
-        <div class="stat-label">Incorrect</div>
+        <div class="stat-value" style="color:var(--wrong)" id="r-wrong">—</div>
+        <div class="stat-label">❌ Incorrect</div>
       </div>
     </div>
 
-    <!-- Performance message -->
-    <div id="performance-msg" style="background:var(--bg-muted); border-radius:var(--r-sm); padding:14px 16px; margin-bottom:20px; font-weight:700; font-size:0.95rem; border: 2px solid var(--border);"></div>
-
     <div class="results-actions">
-      <button class="btn btn-primary btn-full btn-lg" onclick="playAgain()">🔄 Play Again</button>
+      <button class="btn btn-primary btn-full btn-lg" onclick="window.location.href='game.html'">🔄 Play Again!</button>
       <button class="btn btn-success btn-full" onclick="window.location.href='dashboard.html'">📚 Try Another Topic</button>
       <button class="btn btn-ghost btn-full" onclick="window.location.href='dashboard.html'">🏠 Back to Home</button>
     </div>
@@ -57,54 +60,84 @@
 
 <script type="module">
   import { requireAuth } from "../js/guard.js";
+  import { getAvatar, renderAvatarBadgeLarge, initSparkles } from "../js/avatars.js";
+
+  initSparkles(20);
 
   (async () => {
     await requireAuth();
-
     const result = JSON.parse(sessionStorage.getItem("kp_result") || "null");
     if (!result) { window.location.href = "dashboard.html"; return; }
 
-    // Fill in results
+    // Avatar
+    const av = getAvatar(result.avatarType || "star_princess");
+    document.getElementById("result-avatar").innerHTML = renderAvatarBadgeLarge(av.id);
+
+    // Stats
     document.getElementById("r-score").textContent    = result.score;
     document.getElementById("r-correct").textContent  = result.correct_count;
     document.getElementById("r-accuracy").textContent = result.accuracy + "%";
     document.getElementById("r-streak").textContent   = result.best_streak;
     document.getElementById("r-total").textContent    = result.total_questions;
     document.getElementById("r-wrong").textContent    = result.incorrect_count;
+    document.getElementById("results-subtitle").textContent = `${result.subjectEmoji} ${result.subjectName} · ${result.topicName}`;
 
-    // Subject + topic badge
-    document.getElementById("results-subtitle").textContent =
-      `${result.subjectEmoji} ${result.subjectName} · ${result.topicName}`;
-
-    // Performance emoji + message
+    // Performance
     const acc = result.accuracy;
+    const name = result.displayName || "Champion";
     let emoji, title, msg;
     if (acc === 100) {
-      emoji = "🏆"; title = "Perfect Score!";
-      msg   = "🌟 Amazing! You got every question right! You're a superstar!";
+      emoji = "🏆"; title = "PERFECT SCORE!";
+      msg = `🌟 WOW ${name}! Every single answer was correct! You are an absolute superstar! 🌟👑✨`;
+      launchMassConfetti();
     } else if (acc >= 80) {
       emoji = "🎉"; title = "Excellent!";
-      msg   = "🔥 Great job! You really know your stuff. Keep practising!";
+      msg = `🔥 Amazing work, ${name}! You really know your stuff. Keep playing to become a champion! 💜`;
+      launchConfetti(40);
     } else if (acc >= 60) {
       emoji = "😊"; title = "Good Work!";
-      msg   = "👍 Not bad! Play again to beat your score!";
+      msg = `👍 Well done, ${name}! You're getting there. Play again to beat your score! ⭐`;
+      launchConfetti(20);
     } else if (acc >= 40) {
       emoji = "📖"; title = "Keep Practising!";
-      msg   = "💪 Don't give up! Read the explanations and try again!";
+      msg = `💪 Don't give up, ${name}! Read the explanations and try again. You can do it! 💜`;
     } else {
-      emoji = "🌱"; title = "Keep Going!";
-      msg   = "📚 Every expert was once a beginner. Try again — you'll improve!";
+      emoji = "🌱"; title = "You're Learning!";
+      msg = `💜 Every expert was once a beginner, ${name}! Try again and watch yourself improve! 🌟`;
     }
 
     document.getElementById("results-emoji").textContent = emoji;
     document.getElementById("results-title").textContent = title;
-    document.getElementById("performance-msg").textContent = msg;
+    document.getElementById("perf-msg").textContent = msg;
   })();
 
-  window.playAgain = function() {
-    // topic and subject are still in sessionStorage
-    window.location.href = "game.html";
-  };
+  function launchConfetti(count) {
+    const colors = ["#d63384","#7c3aed","#f59e0b","#059669","#f472b6","#a78bfa","#34d399","#fbbf24"];
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const el = document.createElement("div");
+        el.className = "confetti-piece";
+        el.style.cssText = `
+          left: ${Math.random()*100}%;
+          top: ${-Math.random()*20}%;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          width: ${6+Math.random()*8}px;
+          height: ${6+Math.random()*8}px;
+          border-radius: ${Math.random()>0.5?"50%":"2px"};
+          animation-duration: ${2+Math.random()*2}s;
+          animation-delay: ${Math.random()*1.5}s;
+        `;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }, i * 60);
+    }
+  }
+
+  function launchMassConfetti() {
+    launchConfetti(80);
+    setTimeout(() => launchConfetti(40), 1500);
+    setTimeout(() => launchConfetti(30), 3000);
+  }
 </script>
 </body>
 </html>

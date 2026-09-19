@@ -3,56 +3,54 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Kids Play — Learn & Play!</title>
+  <title>Kids Play ✨ — Your Magical Learning World</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
 <div class="page-center">
   <div class="login-wrap">
     <div class="login-logo">
-      <div class="login-logo-icon">🎮</div>
+      <span class="login-logo-icon">🎮</span>
       <div class="login-logo-name">Kids Play</div>
-      <div class="login-logo-tag">Learn through games · Grade 5–8</div>
+      <div class="login-logo-tag">✨ Your magical world of learning ✨</div>
     </div>
 
     <div class="card">
-      <!-- Tabs -->
-      <div class="login-tabs" role="tablist">
+      <div class="login-tabs">
         <button class="login-tab active" id="tab-login" onclick="showTab('login')">🔑 Log In</button>
-        <button class="login-tab" id="tab-register" onclick="showTab('register')">✨ Register</button>
+        <button class="login-tab" id="tab-register" onclick="showTab('register')">🌟 Join Now</button>
       </div>
 
-      <!-- Login form -->
+      <!-- Login -->
       <div id="form-login">
         <div class="form-group">
-          <label class="form-label" for="login-username">Username</label>
-          <input type="text" id="login-username" class="form-input" placeholder="Your username" autocomplete="username" autocapitalize="none"/>
+          <label class="form-label">Your Username</label>
+          <input type="text" id="login-username" class="form-input" placeholder="e.g. aarav2024" autocapitalize="none"/>
         </div>
         <div class="form-group">
-          <label class="form-label" for="login-password">Password</label>
-          <input type="password" id="login-password" class="form-input" placeholder="Your password" autocomplete="current-password"/>
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Your secret password"/>
         </div>
         <p class="form-error" id="login-error"></p>
         <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="doLogin()">
-          🚀 Let's Play!
+          🚀 Enter My World!
         </button>
       </div>
 
-      <!-- Register form -->
+      <!-- Register -->
       <div id="form-register" class="hidden">
         <div class="form-group">
-          <label class="form-label" for="reg-name">Your Name</label>
-          <input type="text" id="reg-name" class="form-input" placeholder="e.g. Aarav" autocomplete="given-name"/>
+          <label class="form-label">Your Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="e.g. Priya"/>
         </div>
         <div class="form-group">
-          <label class="form-label" for="reg-username">Choose a Username</label>
-          <input type="text" id="reg-username" class="form-input" placeholder="e.g. aarav2024" autocomplete="username" autocapitalize="none"/>
-          <p style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Letters and numbers only. No spaces.</p>
+          <label class="form-label">Choose a Username</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="e.g. priya2024" autocapitalize="none"/>
         </div>
         <div class="form-group">
-          <label class="form-label" for="reg-grade">Your Grade</label>
+          <label class="form-label">Your Grade</label>
           <select id="reg-grade" class="form-input">
             <option value="">Select your grade...</option>
             <option value="5">Grade 5</option>
@@ -62,26 +60,51 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="reg-password">Password</label>
-          <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters" autocomplete="new-password"/>
+          <label class="form-label">Choose Your Avatar ✨</label>
+          <div class="avatar-picker-grid" id="avatar-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters"/>
         </div>
         <p class="form-error" id="reg-error"></p>
-        <button class="btn btn-success btn-full btn-lg" id="reg-btn" onclick="doRegister()">
-          🌟 Create Account
+        <button class="btn btn-primary btn-full btn-lg" id="reg-btn" onclick="doRegister()">
+          🌟 Create My Account!
         </button>
       </div>
     </div>
 
-    <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:16px;">
-      No real email needed • Just username + password • Private & safe
+    <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:14px; font-weight:700;">
+      💜 No real email needed &nbsp;·&nbsp; Safe & private &nbsp;·&nbsp; Just for you!
     </p>
   </div>
 </div>
 
 <script type="module">
   import { login, register, getSession } from "./js/auth.js";
+  import { AVATARS, initSparkles } from "./js/avatars.js";
 
-  // If already logged in, go straight to dashboard
+  initSparkles(18);
+
+  let selectedAvatar = "star_princess";
+
+  // Build avatar picker
+  const grid = document.getElementById("avatar-grid");
+  AVATARS.forEach(av => {
+    const div = document.createElement("div");
+    div.className = "avatar-option" + (av.id === selectedAvatar ? " selected" : "");
+    div.dataset.id = av.id;
+    div.style.background = av.gradient;
+    div.innerHTML = `<span class="av-emoji">${av.emoji}</span><span class="av-label">${av.label}</span>`;
+    div.addEventListener("click", () => {
+      document.querySelectorAll(".avatar-option").forEach(o => o.classList.remove("selected"));
+      div.classList.add("selected");
+      selectedAvatar = av.id;
+    });
+    grid.appendChild(div);
+  });
+
+  // Redirect if already logged in
   (async () => {
     const session = await getSession();
     if (session) window.location.href = "pages/dashboard.html";
@@ -101,20 +124,16 @@
     const password = document.getElementById("login-password").value;
     const errEl    = document.getElementById("login-error");
     const btn      = document.getElementById("login-btn");
-
-    if (!username || !password) { errEl.textContent = "Please enter your username and password."; return; }
-
-    btn.disabled = true;
-    btn.textContent = "Logging in...";
+    if (!username || !password) { errEl.textContent = "Please fill in both fields! 🌸"; return; }
+    btn.disabled = true; btn.textContent = "Opening your world... ✨";
     errEl.textContent = "";
-
     try {
       await login({ username, password });
       window.location.href = "pages/dashboard.html";
-    } catch (err) {
-      errEl.textContent = "Username or password is wrong. Try again!";
+    } catch {
+      errEl.textContent = "Hmm, wrong username or password. Try again! 💜";
       btn.disabled = false;
-      btn.innerHTML = "🚀 Let's Play!";
+      btn.innerHTML = "🚀 Enter My World!";
     }
   };
 
@@ -125,35 +144,25 @@
     const password    = document.getElementById("reg-password").value;
     const errEl       = document.getElementById("reg-error");
     const btn         = document.getElementById("reg-btn");
-
-    if (!displayName) { errEl.textContent = "Please enter your name."; return; }
-    if (!username || !/^[a-z0-9_]+$/.test(username)) { errEl.textContent = "Username: letters and numbers only, no spaces."; return; }
-    if (!gradeId) { errEl.textContent = "Please select your grade."; return; }
-    if (password.length < 6) { errEl.textContent = "Password must be at least 6 characters."; return; }
-
-    btn.disabled = true;
-    btn.textContent = "Creating account...";
+    if (!displayName) { errEl.textContent = "Please enter your name! 🌸"; return; }
+    if (!username || !/^[a-z0-9_]+$/.test(username)) { errEl.textContent = "Username: only letters, numbers and underscore!"; return; }
+    if (!gradeId) { errEl.textContent = "Please select your grade! 📚"; return; }
+    if (password.length < 6) { errEl.textContent = "Password must be at least 6 characters! 🔒"; return; }
+    btn.disabled = true; btn.textContent = "Creating your world... 🌟";
     errEl.textContent = "";
-
     try {
-      await register({ username, displayName, password, gradeId });
+      await register({ username, displayName, password, gradeId, avatarType: selectedAvatar });
       window.location.href = "pages/dashboard.html";
     } catch (err) {
-      if (err.message?.includes("already")) {
-        errEl.textContent = "That username is already taken. Try a different one!";
-      } else {
-        errEl.textContent = "Something went wrong. Please try again.";
-      }
+      errEl.textContent = err.message?.includes("already") ? "That username is taken! Try a different one 💜" : "Something went wrong. Try again! 💜";
       btn.disabled = false;
-      btn.innerHTML = "🌟 Create Account";
+      btn.innerHTML = "🌟 Create My Account!";
     }
   };
 
-  // Allow Enter key to submit
   document.addEventListener("keydown", e => {
     if (e.key !== "Enter") return;
-    const loginHidden = document.getElementById("form-login").classList.contains("hidden");
-    if (!loginHidden) window.doLogin();
+    if (!document.getElementById("form-login").classList.contains("hidden")) window.doLogin();
     else window.doRegister();
   });
 </script>

@@ -15,11 +15,9 @@ function toEmail(username) {
 }
 
 // ---- Register a new child ----
-export async function register({ username, displayName, password, gradeId }) {
+export async function register({ username, displayName, password, gradeId, avatarType = "star_princess" }) {
   const email = toEmail(username);
-  const avatarColors = [
-    "#6c5ce7","#00b894","#0984e3","#e17055","#e84393","#00cec9"
-  ];
+  const avatarColors = ["#d63384","#7c3aed","#0891b2","#059669","#dc2626","#f59e0b"];
   const avatarColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
 
   const { data, error } = await supabase.auth.signUp({
@@ -31,6 +29,7 @@ export async function register({ username, displayName, password, gradeId }) {
         display_name: displayName.trim(),
         grade_id:     gradeId,
         avatar_color: avatarColor,
+        avatar_type:  avatarType,
       },
       emailRedirectTo: null,
     },
