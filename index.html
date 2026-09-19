@@ -3,319 +3,327 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Kids Play ✨ — Your Magical World of Learning</title>
+  <title>Kids Play ✨ — Alina & Myra's Magical World</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    /* ---- Magical rain ---- */
-    .rain-container { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-    .raindrop {
-      position:absolute;
-      border-radius:0 0 3px 3px;
-      animation:rainFall linear infinite;
-      top:-30px;
-    }
-    @keyframes rainFall {
-      0%   { transform:translateY(0) rotate(8deg); opacity:0; }
-      8%   { opacity:1; }
-      92%  { opacity:0.8; }
-      100% { transform:translateY(110vh) rotate(8deg); opacity:0; }
-    }
+    /* Rain */
+    .rain-wrap { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+    .rdrop { position:absolute; border-radius:0 0 3px 3px; animation:rfall linear infinite; top:-30px; }
+    @keyframes rfall { 0%{transform:translateY(0) rotate(10deg);opacity:0} 8%{opacity:1} 92%{opacity:.8} 100%{transform:translateY(110vh) rotate(10deg);opacity:0} }
 
-    /* ---- Page layout ---- */
-    body { overflow-x:hidden; }
-    .luna-page {
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:20px 16px 32px;
-      position:relative;
-      z-index:1;
-    }
+    /* Page */
+    .luna-page { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 12px 28px; position:relative; z-index:1; gap:0; }
 
-    /* ---- Character section ---- */
-    .character-section {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      margin-bottom:8px;
-    }
+    /* Duo section */
+    .duo-row { display:flex; align-items:flex-end; justify-content:center; gap:10px; width:100%; max-width:520px; }
+
+    /* Character column */
+    .char-col { display:flex; flex-direction:column; align-items:center; gap:0; flex:1; max-width:220px; }
 
     /* Speech bubble */
-    .speech-bubble {
-      background:rgba(255,255,255,0.92);
-      border:2.5px solid rgba(214,51,132,0.25);
-      border-radius:20px 20px 20px 4px;
-      padding:12px 18px;
-      font-family:"Nunito",sans-serif;
-      font-size:0.95rem;
-      font-weight:800;
-      color:#6b21a8;
-      max-width:260px;
-      text-align:center;
-      box-shadow:0 6px 20px rgba(214,51,132,0.18);
-      backdrop-filter:blur(8px);
-      margin-bottom:6px;
-      position:relative;
-      animation:bubblePop 0.6s cubic-bezier(0.34,1.6,0.64,1) 0.5s both;
-    }
-    .speech-bubble::after {
-      content:"";
-      position:absolute;
-      bottom:-18px; left:24px;
-      border:10px solid transparent;
-      border-top-color:rgba(214,51,132,0.25);
-    }
-    .speech-bubble::before {
-      content:"";
-      position:absolute;
-      bottom:-13px; left:26px;
-      border:8px solid transparent;
-      border-top-color:rgba(255,255,255,0.92);
-      z-index:1;
-    }
-    @keyframes bubblePop {
-      from{transform:scale(0.5) translateY(10px); opacity:0;}
-      to{transform:scale(1) translateY(0); opacity:1;}
-    }
-    .bubble-text-1 { font-size:1.05rem; margin-bottom:2px; }
-    .bubble-text-2 { font-size:0.82rem; color:#9d174d; font-weight:700; }
+    .bubble { background:rgba(255,255,255,0.93); border-radius:18px; padding:10px 14px; font-family:"Nunito",sans-serif; font-size:0.82rem; font-weight:800; max-width:190px; text-align:center; box-shadow:0 4px 16px rgba(214,51,132,0.18); backdrop-filter:blur(8px); position:relative; margin-bottom:6px; animation:bpop 0.6s cubic-bezier(0.34,1.6,0.64,1) both; }
+    .bubble-a { border:2.5px solid rgba(236,72,153,0.3); color:#9d174d; animation-delay:0.4s; }
+    .bubble-a::after { content:""; position:absolute; bottom:-16px; left:30px; border:9px solid transparent; border-top-color:rgba(236,72,153,0.3); }
+    .bubble-a::before { content:""; position:absolute; bottom:-12px; left:32px; border:7px solid transparent; border-top-color:rgba(255,255,255,0.93); z-index:1; }
+    .bubble-m { border:2.5px solid rgba(124,58,237,0.3); color:#4c1d95; animation-delay:0.9s; opacity:0; }
+    .bubble-m.show { opacity:1; }
+    .bubble-m::after { content:""; position:absolute; bottom:-16px; right:30px; border:9px solid transparent; border-top-color:rgba(124,58,237,0.3); }
+    .bubble-m::before { content:""; position:absolute; bottom:-12px; right:32px; border:7px solid transparent; border-top-color:rgba(255,255,255,0.93); z-index:1; }
+    @keyframes bpop { from{transform:scale(0.4) translateY(8px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
 
-    /* Luna SVG container */
-    .luna-wrap {
-      animation:lunaFloat 3.5s ease-in-out infinite;
-      filter:drop-shadow(0 12px 24px rgba(214,51,132,0.3));
-    }
-    @keyframes lunaFloat {
-      0%,100% { transform:translateY(0px); }
-      50%      { transform:translateY(-14px); }
-    }
+    /* Character float */
+    .char-float { animation:cfloat 3.2s ease-in-out infinite; filter:drop-shadow(0 10px 20px rgba(214,51,132,0.25)); }
+    .char-float-2 { animation:cfloat2 3.6s ease-in-out infinite; filter:drop-shadow(0 10px 20px rgba(124,58,237,0.25)); }
+    @keyframes cfloat  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-13px)} }
+    @keyframes cfloat2 { 0%,100%{transform:translateY(-4px)} 50%{transform:translateY(-17px)} }
 
-    /* ---- Login card ---- */
-    .login-wrap { max-width:400px; width:100%; }
-    .card {
-      background:rgba(255,255,255,0.92) !important;
-      border:2px solid rgba(214,51,132,0.15) !important;
-      backdrop-filter:blur(16px) !important;
-      padding:24px 22px !important;
-    }
-    .login-tabs {
-      display:flex;
-      background:rgba(253,228,236,0.6);
-      border-radius:999px;
-      padding:4px;
-      margin-bottom:20px;
-      border:2px solid rgba(214,51,132,0.18);
-    }
-    .login-tab {
-      flex:1; padding:10px; text-align:center;
-      border-radius:999px; font-weight:800; font-size:0.9rem;
-      cursor:pointer; color:#9d174d;
-      transition:all 0.2s; border:none;
-      background:transparent; font-family:"Nunito",sans-serif;
-    }
-    .login-tab.active {
-      background:linear-gradient(135deg,#d63384,#f43f8e);
-      color:#fff;
-      box-shadow:0 4px 14px rgba(214,51,132,0.4);
-    }
+    /* Name tag */
+    .char-name { font-family:"Fredoka One",cursive; font-size:1.1rem; margin-top:2px; }
+    .name-a { color:#db2777; }
+    .name-m { color:#7c3aed; }
 
-    /* Avatar picker */
-    .avatar-picker-grid {
-      display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-      margin:10px 0 16px;
-    }
-    .avatar-option {
-      aspect-ratio:1; border-radius:14px;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:3px;
-      cursor:pointer; border:3px solid transparent;
-      transition:all 0.18s; padding:6px 2px;
-      background:rgba(255,255,255,0.8);
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);
-    }
-    .avatar-option:hover { transform:scale(1.08); border-color:rgba(214,51,132,0.5); }
-    .avatar-option.selected { border-color:#d63384; box-shadow:0 0 0 3px rgba(214,51,132,0.2); transform:scale(1.08); }
-    .av-emoji { font-size:1.7rem; }
+    /* Login card */
+    .login-wrap { max-width:390px; width:100%; margin-top:10px; }
+    .card { background:rgba(255,255,255,0.92)!important; border:2px solid rgba(214,51,132,0.15)!important; backdrop-filter:blur(16px)!important; padding:22px 20px!important; }
+    .login-tabs { display:flex; background:rgba(253,228,236,0.6); border-radius:999px; padding:4px; margin-bottom:18px; border:2px solid rgba(214,51,132,0.18); }
+    .login-tab { flex:1; padding:9px; text-align:center; border-radius:999px; font-weight:800; font-size:0.88rem; cursor:pointer; color:#9d174d; transition:all 0.2s; border:none; background:transparent; font-family:"Nunito",sans-serif; }
+    .login-tab.active { background:linear-gradient(135deg,#d63384,#f43f8e); color:#fff; box-shadow:0 4px 12px rgba(214,51,132,0.35); }
+    .avatar-picker-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:10px 0 14px; }
+    .avatar-option { aspect-ratio:1; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; border:3px solid transparent; transition:all 0.18s; background:rgba(255,255,255,0.8); box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+    .avatar-option:hover,.avatar-option.selected { transform:scale(1.08); border-color:#d63384; box-shadow:0 0 0 3px rgba(214,51,132,0.2); }
+    .av-emoji { font-size:1.6rem; }
     .av-label { font-size:0.55rem; font-weight:800; color:#9d174d; text-align:center; line-height:1.2; }
+    .footer-note { text-align:center; font-size:0.76rem; color:#9d174d; margin-top:10px; font-weight:700; opacity:0.75; }
 
-    .footer-note { text-align:center; font-size:0.78rem; color:#9d174d; margin-top:12px; font-weight:700; opacity:0.8; }
+    @media(max-width:400px) {
+      .duo-row { gap:4px; }
+      .bubble { font-size:0.72rem; padding:8px 10px; }
+      .char-col { max-width:170px; }
+    }
   </style>
 </head>
 <body>
 
-<!-- Magical rain -->
-<div class="rain-container" id="rain"></div>
+<div class="rain-wrap" id="rain"></div>
 
 <div class="luna-page">
 
-  <!-- Luna character + speech bubble -->
-  <div class="character-section">
-    <div class="speech-bubble">
-      <div class="bubble-text-1">Hi! I'm Luna! ✨</div>
-      <div class="bubble-text-2">Welcome to your magical world of learning! 🌟</div>
-    </div>
+  <!-- ALINA & MYRA DUO -->
+  <div class="duo-row">
 
-    <!-- Animated SVG character Luna -->
-    <div class="luna-wrap">
-      <svg viewBox="0 0 200 280" width="170" height="238" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="dressG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#e879f9"/>
-            <stop offset="100%" stop-color="#7c3aed"/>
-          </linearGradient>
-          <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#7c3aed"/>
-            <stop offset="100%" stop-color="#4c1d95"/>
-          </linearGradient>
-          <radialGradient id="faceG" cx="50%" cy="40%">
-            <stop offset="0%" stop-color="#fef3c7"/>
-            <stop offset="100%" stop-color="#fde68a"/>
-          </radialGradient>
-          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
+    <!-- ALINA (left) -->
+    <div class="char-col">
+      <div class="bubble bubble-a">
+        Hi! I'm Alina! ✨<br>
+        <span style="font-size:0.75rem;font-weight:700;color:#be185d;">Welcome to our magical world of learning!</span>
+      </div>
+      <div class="char-float">
+        <svg viewBox="0 0 160 256" width="148" height="237" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="adress" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f9a8d4"/>
+              <stop offset="100%" stop-color="#db2777"/>
+            </linearGradient>
+            <radialGradient id="aface" cx="45%" cy="35%">
+              <stop offset="0%" stop-color="#fef3c7"/>
+              <stop offset="100%" stop-color="#fde68a"/>
+            </radialGradient>
+            <filter id="ag">
+              <feGaussianBlur stdDeviation="2.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
 
-        <!-- ⭐ Crown -->
-        <g transform="translate(72,4)">
-          <polygon points="28,0 35,18 56,18 40,29 47,47 28,36 9,47 16,29 0,18 21,18" fill="#fbbf24" filter="url(#glow)"/>
-          <circle cx="28" cy="10" r="5" fill="#f59e0b"/>
-          <circle cx="4" cy="22" r="3.5" fill="#f59e0b"/>
-          <circle cx="52" cy="22" r="3.5" fill="#f59e0b"/>
-        </g>
+          <!-- Black hair back -->
+          <ellipse cx="80" cy="68" rx="48" ry="52" fill="#111827"/>
+          <path d="M34 72 Q20 126 26 170" stroke="#111827" stroke-width="22" stroke-linecap="round" fill="none"/>
+          <path d="M126 72 Q140 126 134 170" stroke="#111827" stroke-width="22" stroke-linecap="round" fill="none"/>
+          <!-- Hair shine -->
+          <path d="M58 28 Q80 20 100 26" stroke="rgba(255,255,255,0.18)" stroke-width="4" stroke-linecap="round" fill="none"/>
 
-        <!-- Hair (back, flowing) -->
-        <ellipse cx="100" cy="85" rx="52" ry="55" fill="url(#hairG)"/>
-        <!-- Side hair strands -->
-        <path d="M52 90 Q38 140 44 185" stroke="#4c1d95" stroke-width="24" stroke-linecap="round" fill="none"/>
-        <path d="M148 90 Q162 140 156 185" stroke="#4c1d95" stroke-width="24" stroke-linecap="round" fill="none"/>
-        <!-- Hair highlights -->
-        <path d="M68 52 Q80 40 100 38" stroke="rgba(167,139,250,0.5)" stroke-width="4" stroke-linecap="round" fill="none"/>
-
-        <!-- Face -->
-        <circle cx="100" cy="88" r="42" fill="url(#faceG)"/>
-
-        <!-- Ears -->
-        <ellipse cx="58" cy="88" rx="9" ry="10" fill="#fde68a"/>
-        <ellipse cx="142" cy="88" rx="9" ry="10" fill="#fde68a"/>
-        <ellipse cx="58" cy="88" rx="5" ry="6" fill="#f9a8d4"/>
-        <ellipse cx="142" cy="88" rx="5" ry="6" fill="#f9a8d4"/>
-
-        <!-- Eyebrows -->
-        <path d="M78 68 Q86 63 94 67" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M106 67 Q114 63 122 68" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-        <!-- Left eye -->
-        <ellipse cx="86" cy="80" rx="8" ry="9" fill="#1e1b4b">
-          <animate attributeName="ry" values="9;1.5;9" dur="4s" repeatCount="indefinite" begin="0s"/>
-        </ellipse>
-        <ellipse cx="84" cy="77" rx="3" ry="3" fill="white" opacity="0.85"/>
-        <!-- Lashes left -->
-        <line x1="78" y1="73" x2="82" y2="70" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="86" y1="71" x2="86" y2="67" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="94" y1="73" x2="91" y2="70" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-
-        <!-- Right eye -->
-        <ellipse cx="114" cy="80" rx="8" ry="9" fill="#1e1b4b">
-          <animate attributeName="ry" values="9;1.5;9" dur="4s" repeatCount="indefinite" begin="0.05s"/>
-        </ellipse>
-        <ellipse cx="112" cy="77" rx="3" ry="3" fill="white" opacity="0.85"/>
-        <!-- Lashes right -->
-        <line x1="106" y1="73" x2="109" y2="70" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="114" y1="71" x2="114" y2="67" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="122" y1="73" x2="119" y2="70" stroke="#1e1b4b" stroke-width="1.8" stroke-linecap="round"/>
-
-        <!-- Rosy cheeks -->
-        <ellipse cx="72" cy="96" rx="13" ry="9" fill="#fb7185" opacity="0.4"/>
-        <ellipse cx="128" cy="96" rx="13" ry="9" fill="#fb7185" opacity="0.4"/>
-
-        <!-- Nose -->
-        <ellipse cx="100" cy="93" rx="3.5" ry="2.5" fill="#f9a8d4" opacity="0.6"/>
-
-        <!-- Smile -->
-        <path d="M88 104 Q100 118 112 104" fill="none" stroke="#be185d" stroke-width="3.5" stroke-linecap="round"/>
-        <!-- Tooth shine -->
-        <path d="M97 108 Q100 111 103 108" fill="white" opacity="0.6"/>
-
-        <!-- Neck -->
-        <rect x="90" y="128" width="20" height="12" rx="8" fill="#fde68a"/>
-
-        <!-- Body / dress -->
-        <path d="M55 140 Q100 133 145 140 L152 215 Q100 228 48 215 Z" fill="url(#dressG)"/>
-        <!-- Dress collar -->
-        <path d="M80 135 Q100 148 120 135 Q110 155 100 152 Q90 155 80 135Z" fill="rgba(255,255,255,0.35)"/>
-        <!-- Dress details -->
-        <path d="M62 160 Q100 155 138 160" stroke="rgba(255,255,255,0.35)" stroke-width="2" fill="none"/>
-        <path d="M58 180 Q100 175 142 180" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
-        <!-- Star on dress -->
-        <text x="88" y="198" font-size="18" opacity="0.8" fill="white">✨</text>
-
-        <!-- Left arm (holding wand) -->
-        <path d="M58 145 Q38 162 36 182" stroke="#fde68a" stroke-width="17" stroke-linecap="round" fill="none"/>
-        <circle cx="36" cy="184" r="9" fill="#fde68a"/>
-        <!-- Wand -->
-        <line x1="32" y1="176" x2="14" y2="155" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round"/>
-        <circle cx="13" cy="153" r="7" fill="#fbbf24" filter="url(#glow)" opacity="0.9"/>
-        <text x="5" y="148" font-size="13">⭐</text>
-
-        <!-- Right arm WAVING -->
-        <g>
-          <path d="M142 145 Q162 128 166 106" stroke="#fde68a" stroke-width="17" stroke-linecap="round" fill="none">
-            <animateTransform attributeName="transform" type="rotate"
-              values="0,142,145; -18,142,145; 8,142,145; -18,142,145; 0,142,145"
-              dur="1.3s" repeatCount="indefinite"/>
-          </path>
-          <circle cx="167" cy="104" r="9" fill="#fde68a">
-            <animateTransform attributeName="transform" type="rotate"
-              values="0,142,145; -18,142,145; 8,142,145; -18,142,145; 0,142,145"
-              dur="1.3s" repeatCount="indefinite"/>
-          </circle>
-          <!-- Fingers hint -->
-          <g>
-            <animateTransform attributeName="transform" type="rotate"
-              values="0,142,145; -18,142,145; 8,142,145; -18,142,145; 0,142,145"
-              dur="1.3s" repeatCount="indefinite"/>
+          <!-- Gold Crown -->
+          <g transform="translate(52,6)">
+            <rect x="0" y="13" width="56" height="11" rx="4" fill="#fbbf24"/>
+            <polygon points="0,13 9,0 18,13" fill="#fbbf24"/>
+            <polygon points="19,13 28,1 37,13" fill="#fbbf24"/>
+            <polygon points="38,13 47,0 56,13" fill="#fbbf24"/>
+            <circle cx="9" cy="0" r="3.5" fill="#f87171"/>
+            <circle cx="28" cy="1" r="3.5" fill="#34d399"/>
+            <circle cx="47" cy="0" r="3.5" fill="#60a5fa"/>
           </g>
-        </g>
-        <!-- Waving sparkle trail -->
-        <circle cx="178" cy="98" r="3" fill="#fbbf24" opacity="0.7">
-          <animate attributeName="opacity" values="0.7;0;0.7" dur="1.3s" repeatCount="indefinite"/>
-          <animate attributeName="r" values="3;5;3" dur="1.3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="188" cy="86" r="2" fill="#f9a8d4" opacity="0.6">
-          <animate attributeName="opacity" values="0.6;0;0.6" dur="1.3s" begin="0.3s" repeatCount="indefinite"/>
-        </circle>
 
-        <!-- Legs -->
-        <path d="M82 215 Q80 238 78 258" stroke="#c026d3" stroke-width="22" stroke-linecap="round" fill="none"/>
-        <path d="M118 215 Q120 238 122 258" stroke="#c026d3" stroke-width="22" stroke-linecap="round" fill="none"/>
-        <!-- Shoes -->
-        <ellipse cx="78" cy="260" rx="16" ry="9" fill="#9d174d"/>
-        <ellipse cx="122" cy="260" rx="16" ry="9" fill="#9d174d"/>
-        <!-- Shoe bow -->
-        <text x="68" y="257" font-size="12">🎀</text>
-        <text x="112" y="257" font-size="12">🎀</text>
+          <!-- Face -->
+          <circle cx="80" cy="80" r="39" fill="url(#aface)"/>
+          <!-- Ears -->
+          <ellipse cx="42" cy="80" rx="8" ry="9" fill="#fde68a"/><ellipse cx="42" cy="80" rx="4.5" ry="5.5" fill="#f9a8d4"/>
+          <ellipse cx="118" cy="80" rx="8" ry="9" fill="#fde68a"/><ellipse cx="118" cy="80" rx="4.5" ry="5.5" fill="#f9a8d4"/>
+          <!-- Brows -->
+          <path d="M63 62 Q71 57 79 61" stroke="#374151" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M81 61 Q89 57 97 62" stroke="#374151" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <!-- Left eye -->
+          <ellipse cx="70" cy="74" rx="7.5" ry="8.5" fill="#1e1b4b"><animate attributeName="ry" values="8.5;1;8.5" dur="4s" repeatCount="indefinite"/></ellipse>
+          <ellipse cx="68" cy="71" rx="2.5" ry="2.5" fill="white" opacity="0.85"/>
+          <line x1="62" y1="66" x2="66" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="70" y1="65" x2="70" y2="61" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="78" y1="66" x2="75" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <!-- Right eye -->
+          <ellipse cx="90" cy="74" rx="7.5" ry="8.5" fill="#1e1b4b"><animate attributeName="ry" values="8.5;1;8.5" dur="4s" repeatCount="indefinite" begin="0.08s"/></ellipse>
+          <ellipse cx="88" cy="71" rx="2.5" ry="2.5" fill="white" opacity="0.85"/>
+          <line x1="82" y1="66" x2="85" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="90" y1="65" x2="90" y2="61" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="98" y1="66" x2="95" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <!-- Cheeks -->
+          <ellipse cx="56" cy="86" rx="12" ry="8" fill="#fb7185" opacity="0.38"/>
+          <ellipse cx="104" cy="86" rx="12" ry="8" fill="#fb7185" opacity="0.38"/>
+          <!-- Nose -->
+          <ellipse cx="80" cy="85" rx="3" ry="2" fill="#f9a8d4" opacity="0.55"/>
+          <!-- Smile -->
+          <path d="M69 95 Q80 109 91 95" fill="none" stroke="#be185d" stroke-width="3.5" stroke-linecap="round"/>
 
-        <!-- Floating sparkles around Luna -->
-        <text x="160" y="70" font-size="16" opacity="0.9">
-          ✨<animate attributeName="opacity" values="0.9;0.3;0.9" dur="2s" repeatCount="indefinite"/>
-        </text>
-        <text x="10" y="110" font-size="14" opacity="0.8">
-          💫<animate attributeName="opacity" values="0.8;0.2;0.8" dur="2.5s" repeatCount="indefinite"/>
-        </text>
-        <text x="170" y="160" font-size="12" opacity="0.7">
-          ⭐<animate attributeName="opacity" values="0.7;0.1;0.7" dur="1.8s" repeatCount="indefinite"/>
-        </text>
-      </svg>
+          <!-- Neck -->
+          <rect x="72" y="117" width="16" height="10" rx="6" fill="#fde68a"/>
+          <!-- Dress -->
+          <path d="M40 127 Q80 120 120 127 L126 202 Q80 214 34 202 Z" fill="url(#adress)"/>
+          <path d="M60 122 Q80 134 100 122 Q92 143 80 140 Q68 143 60 122Z" fill="rgba(255,255,255,0.3)"/>
+          <path d="M46 152 Q80 147 114 152" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+          <text x="68" y="180" font-size="16" opacity="0.85" fill="white">💫</text>
+
+          <!-- Right arm (relaxed) -->
+          <path d="M118 132 Q134 150 132 172" stroke="#fde68a" stroke-width="15" stroke-linecap="round" fill="none"/>
+          <circle cx="131" cy="174" r="8" fill="#fde68a"/>
+
+          <!-- LEFT ARM waves with GOLD STAR WAND -->
+          <g id="alina-wave">
+            <animateTransform attributeName="transform" type="rotate" values="0,44,132; 22,44,132; -6,44,132; 22,44,132; 0,44,132" dur="1.35s" repeatCount="indefinite"/>
+            <!-- Arm -->
+            <path d="M44 132 Q24 112 18 88" stroke="#fde68a" stroke-width="15" stroke-linecap="round" fill="none"/>
+            <circle cx="17" cy="86" r="8" fill="#fde68a"/>
+            <!-- Wand stick -->
+            <line x1="14" y1="80" x2="2" y2="56" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Wand star tip -->
+            <circle cx="1" cy="53" r="8" fill="#fbbf24" filter="url(#ag)" opacity="0.95"/>
+            <text x="-8" y="48" font-size="13">⭐</text>
+            <!-- STAR TRAIL -->
+            <circle cx="8" cy="64" r="5" fill="#fbbf24">
+              <animate attributeName="opacity" values="0;1;0" dur="1.35s" begin="0.1s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="5;1.5;5" dur="1.35s" begin="0.1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="14" cy="72" r="3.5" fill="#f9a8d4">
+              <animate attributeName="opacity" values="0;0.9;0" dur="1.35s" begin="0.2s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="3.5;0.8;3.5" dur="1.35s" begin="0.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="4" cy="70" r="3" fill="#c084fc">
+              <animate attributeName="opacity" values="0;0.8;0" dur="1.35s" begin="0.3s" repeatCount="indefinite"/>
+            </circle>
+            <text x="10" y="52" font-size="10" fill="#fbbf24" opacity="0">✨<animate attributeName="opacity" values="0;1;0" dur="1.35s" begin="0.4s" repeatCount="indefinite"/></text>
+            <text x="-4" y="80" font-size="9" fill="#f9a8d4" opacity="0">⭐<animate attributeName="opacity" values="0;1;0" dur="1.35s" begin="0.65s" repeatCount="indefinite"/></text>
+            <circle cx="-4" cy="62" r="2" fill="#fde68a">
+              <animate attributeName="opacity" values="0;0.7;0" dur="1.35s" begin="0.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+
+          <!-- Legs -->
+          <path d="M62 202 Q60 224 58 244" stroke="#be185d" stroke-width="19" stroke-linecap="round" fill="none"/>
+          <path d="M98 202 Q100 224 102 244" stroke="#be185d" stroke-width="19" stroke-linecap="round" fill="none"/>
+          <ellipse cx="58" cy="246" rx="14" ry="8" fill="#9d174d"/>
+          <ellipse cx="102" cy="246" rx="14" ry="8" fill="#9d174d"/>
+          <text x="48" y="244" font-size="11">🎀</text>
+          <text x="92" y="244" font-size="11">🎀</text>
+        </svg>
+      </div>
+      <div class="char-name name-a">Alina ✨</div>
     </div>
-  </div>
 
-  <!-- Login card -->
+    <!-- MYRA (right) -->
+    <div class="char-col">
+      <div class="bubble bubble-m" id="myra-bubble">
+        And I'm Myra! 🌟<br>
+        <span style="font-size:0.75rem;font-weight:700;color:#6d28d9;">Let's learn & play together!</span>
+      </div>
+      <div class="char-float-2">
+        <svg viewBox="0 0 160 256" width="148" height="237" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mdress" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c4b5fd"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+            <radialGradient id="mface" cx="55%" cy="35%">
+              <stop offset="0%" stop-color="#fef3c7"/>
+              <stop offset="100%" stop-color="#fde68a"/>
+            </radialGradient>
+            <filter id="mg">
+              <feGaussianBlur stdDeviation="2.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Black hair back -->
+          <ellipse cx="80" cy="68" rx="48" ry="52" fill="#111827"/>
+          <path d="M34 72 Q20 126 26 170" stroke="#111827" stroke-width="22" stroke-linecap="round" fill="none"/>
+          <path d="M126 72 Q140 126 134 170" stroke="#111827" stroke-width="22" stroke-linecap="round" fill="none"/>
+          <!-- Hair shine -->
+          <path d="M55 28 Q80 19 105 26" stroke="rgba(255,255,255,0.18)" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+          <!-- Silver/Purple Crown for Myra -->
+          <g transform="translate(52,6)">
+            <rect x="0" y="13" width="56" height="11" rx="4" fill="#c4b5fd"/>
+            <polygon points="0,13 9,0 18,13" fill="#c4b5fd"/>
+            <polygon points="19,13 28,1 37,13" fill="#c4b5fd"/>
+            <polygon points="38,13 47,0 56,13" fill="#c4b5fd"/>
+            <circle cx="9" cy="0" r="3.5" fill="#a78bfa"/>
+            <circle cx="28" cy="1" r="3.5" fill="#f0abfc"/>
+            <circle cx="47" cy="0" r="3.5" fill="#67e8f9"/>
+            <!-- Crown shine -->
+            <path d="M8 15 Q28 11 48 15" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </g>
+
+          <!-- Face -->
+          <circle cx="80" cy="80" r="39" fill="url(#mface)"/>
+          <!-- Ears -->
+          <ellipse cx="42" cy="80" rx="8" ry="9" fill="#fde68a"/><ellipse cx="42" cy="80" rx="4.5" ry="5.5" fill="#c4b5fd"/>
+          <ellipse cx="118" cy="80" rx="8" ry="9" fill="#fde68a"/><ellipse cx="118" cy="80" rx="4.5" ry="5.5" fill="#c4b5fd"/>
+          <!-- Brows -->
+          <path d="M63 62 Q71 57 79 61" stroke="#374151" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M81 61 Q89 57 97 62" stroke="#374151" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <!-- Left eye -->
+          <ellipse cx="70" cy="74" rx="7.5" ry="8.5" fill="#1e1b4b"><animate attributeName="ry" values="8.5;1;8.5" dur="4.5s" repeatCount="indefinite" begin="0.3s"/></ellipse>
+          <ellipse cx="68" cy="71" rx="2.5" ry="2.5" fill="white" opacity="0.85"/>
+          <line x1="62" y1="66" x2="66" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="70" y1="65" x2="70" y2="61" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="78" y1="66" x2="75" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <!-- Right eye -->
+          <ellipse cx="90" cy="74" rx="7.5" ry="8.5" fill="#1e1b4b"><animate attributeName="ry" values="8.5;1;8.5" dur="4.5s" repeatCount="indefinite" begin="0.38s"/></ellipse>
+          <ellipse cx="88" cy="71" rx="2.5" ry="2.5" fill="white" opacity="0.85"/>
+          <line x1="82" y1="66" x2="85" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="90" y1="65" x2="90" y2="61" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="98" y1="66" x2="95" y2="63" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/>
+          <!-- Cheeks -->
+          <ellipse cx="56" cy="86" rx="12" ry="8" fill="#c084fc" opacity="0.35"/>
+          <ellipse cx="104" cy="86" rx="12" ry="8" fill="#c084fc" opacity="0.35"/>
+          <!-- Nose -->
+          <ellipse cx="80" cy="85" rx="3" ry="2" fill="#c4b5fd" opacity="0.55"/>
+          <!-- Smile -->
+          <path d="M69 95 Q80 109 91 95" fill="none" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+
+          <!-- Neck -->
+          <rect x="72" y="117" width="16" height="10" rx="6" fill="#fde68a"/>
+          <!-- Dress -->
+          <path d="M40 127 Q80 120 120 127 L126 202 Q80 214 34 202 Z" fill="url(#mdress)"/>
+          <path d="M60 122 Q80 134 100 122 Q92 143 80 140 Q68 143 60 122Z" fill="rgba(255,255,255,0.28)"/>
+          <path d="M46 152 Q80 147 114 152" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" fill="none"/>
+          <text x="68" y="180" font-size="16" opacity="0.85" fill="white">🌟</text>
+
+          <!-- Left arm (relaxed) -->
+          <path d="M42 132 Q26 150 28 172" stroke="#fde68a" stroke-width="15" stroke-linecap="round" fill="none"/>
+          <circle cx="29" cy="174" r="8" fill="#fde68a"/>
+
+          <!-- RIGHT ARM waves with TEAL HEART WAND -->
+          <g id="myra-wave">
+            <animateTransform attributeName="transform" type="rotate" values="0,116,132; -22,116,132; 6,116,132; -22,116,132; 0,116,132" dur="1.45s" repeatCount="indefinite"/>
+            <!-- Arm -->
+            <path d="M116 132 Q136 112 142 88" stroke="#fde68a" stroke-width="15" stroke-linecap="round" fill="none"/>
+            <circle cx="143" cy="86" r="8" fill="#fde68a"/>
+            <!-- Wand stick - TEAL -->
+            <line x1="146" y1="80" x2="158" y2="56" stroke="#2dd4bf" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Wand heart tip -->
+            <circle cx="159" cy="53" r="8" fill="#14b8a6" filter="url(#mg)" opacity="0.95"/>
+            <text x="151" y="48" font-size="13">💜</text>
+            <!-- HEART / CIRCLE TRAIL - teal & purple -->
+            <circle cx="152" cy="64" r="5" fill="#2dd4bf">
+              <animate attributeName="opacity" values="0;1;0" dur="1.45s" begin="0.1s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="5;1.5;5" dur="1.45s" begin="0.1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="146" cy="72" r="3.5" fill="#a78bfa">
+              <animate attributeName="opacity" values="0;0.9;0" dur="1.45s" begin="0.22s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="3.5;0.8;3.5" dur="1.45s" begin="0.22s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="156" cy="70" r="3" fill="#67e8f9">
+              <animate attributeName="opacity" values="0;0.8;0" dur="1.45s" begin="0.34s" repeatCount="indefinite"/>
+            </circle>
+            <text x="142" y="53" font-size="10" fill="#2dd4bf" opacity="0">✨<animate attributeName="opacity" values="0;1;0" dur="1.45s" begin="0.4s" repeatCount="indefinite"/></text>
+            <text x="158" y="80" font-size="9" fill="#a78bfa" opacity="0">💫<animate attributeName="opacity" values="0;1;0" dur="1.45s" begin="0.62s" repeatCount="indefinite"/></text>
+            <circle cx="163" cy="62" r="2" fill="#14b8a6">
+              <animate attributeName="opacity" values="0;0.7;0" dur="1.45s" begin="0.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+
+          <!-- Legs -->
+          <path d="M62 202 Q60 224 58 244" stroke="#6d28d9" stroke-width="19" stroke-linecap="round" fill="none"/>
+          <path d="M98 202 Q100 224 102 244" stroke="#6d28d9" stroke-width="19" stroke-linecap="round" fill="none"/>
+          <ellipse cx="58" cy="246" rx="14" ry="8" fill="#4c1d95"/>
+          <ellipse cx="102" cy="246" rx="14" ry="8" fill="#4c1d95"/>
+          <text x="48" y="244" font-size="11">🌸</text>
+          <text x="92" y="244" font-size="11">🌸</text>
+        </svg>
+      </div>
+      <div class="char-name name-m">Myra 🌟</div>
+    </div>
+
+  </div><!-- /duo-row -->
+
+  <!-- LOGIN CARD -->
   <div class="login-wrap">
     <div class="card">
       <div class="login-tabs">
@@ -323,7 +331,6 @@
         <button class="login-tab" id="tab-register" onclick="showTab('register')">🌟 Join Now</button>
       </div>
 
-      <!-- Login form -->
       <div id="form-login">
         <div class="form-group">
           <label class="form-label">Your Username</label>
@@ -334,12 +341,9 @@
           <input type="password" id="login-password" class="form-input" placeholder="Your secret password" autocomplete="current-password"/>
         </div>
         <p class="form-error" id="login-error"></p>
-        <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="doLogin()">
-          🚀 Enter My World!
-        </button>
+        <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="doLogin()">🚀 Enter Our World!</button>
       </div>
 
-      <!-- Register form -->
       <div id="form-register" class="hidden">
         <div class="form-group">
           <label class="form-label">Your Name</label>
@@ -347,7 +351,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Choose a Username</label>
-          <input type="text" id="reg-username" class="form-input" placeholder="e.g. priya2024" autocapitalize="none" autocomplete="username"/>
+          <input type="text" id="reg-username" class="form-input" placeholder="e.g. priya2024" autocapitalize="none"/>
         </div>
         <div class="form-group">
           <label class="form-label">Your Grade</label>
@@ -368,13 +372,10 @@
           <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters" autocomplete="new-password"/>
         </div>
         <p class="form-error" id="reg-error"></p>
-        <button class="btn btn-primary btn-full btn-lg" id="reg-btn" onclick="doRegister()">
-          🌟 Create My Account!
-        </button>
+        <button class="btn btn-primary btn-full btn-lg" id="reg-btn" onclick="doRegister()">🌟 Create My Account!</button>
       </div>
     </div>
-
-    <p class="footer-note">💜 No email needed &nbsp;·&nbsp; Safe &nbsp;·&nbsp; Just for you!</p>
+    <p class="footer-note">💜 No email needed · Safe & private · Just for you!</p>
   </div>
 </div>
 
@@ -383,44 +384,29 @@
   import { AVATARS, initSparkles } from "./js/avatars.js";
 
   // Sparkles
-  initSparkles(12);
+  initSparkles(10);
 
   // Magical rain
   const rain = document.getElementById("rain");
-  const colors = [
-    "rgba(244,114,182,0.65)","rgba(167,139,250,0.55)",
-    "rgba(251,191,36,0.45)","rgba(196,181,253,0.6)",
-    "rgba(249,168,212,0.5)"
-  ];
-  for (let i = 0; i < 55; i++) {
+  const rc = ["rgba(244,114,182,.6)","rgba(167,139,250,.5)","rgba(251,191,36,.4)","rgba(196,181,253,.55)","rgba(45,212,191,.4)"];
+  for (let i = 0; i < 52; i++) {
     const d = document.createElement("div");
-    d.className = "raindrop";
-    const len = 10 + Math.random() * 14;
-    d.style.cssText = `
-      left:${Math.random()*100}%;
-      width:${1 + Math.random()*1.5}px;
-      height:${len}px;
-      background:linear-gradient(transparent,${colors[Math.floor(Math.random()*colors.length)]});
-      animation-duration:${1.2 + Math.random()*2}s;
-      animation-delay:${Math.random()*3}s;
-    `;
+    d.className = "rdrop";
+    const len = 10 + Math.random()*14;
+    d.style.cssText = `left:${Math.random()*100}%;width:${1+Math.random()*1.4}px;height:${len}px;background:linear-gradient(transparent,${rc[Math.floor(Math.random()*rc.length)]});animation-duration:${1.2+Math.random()*2}s;animation-delay:${Math.random()*3}s;`;
     rain.appendChild(d);
   }
-  // Occasional sparkle drops
-  for (let i = 0; i < 12; i++) {
+  // Sparkle drops
+  for (let i = 0; i < 10; i++) {
     const s = document.createElement("div");
-    s.className = "sparkle raindrop";
-    s.textContent = ["✨","💧","💜","⭐","🌸"][Math.floor(Math.random()*5)];
-    s.style.cssText = `
-      left:${Math.random()*100}%;
-      font-size:${0.6+Math.random()*0.5}rem;
-      width:auto; height:auto;
-      background:none;
-      animation-duration:${2+Math.random()*2.5}s;
-      animation-delay:${Math.random()*4}s;
-    `;
+    s.className = "rdrop";
+    s.textContent = ["✨","💜","⭐","🌸","💎"][Math.floor(Math.random()*5)];
+    s.style.cssText = `left:${Math.random()*100}%;font-size:${0.55+Math.random()*0.45}rem;width:auto;height:auto;background:none;animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*4}s;`;
     rain.appendChild(s);
   }
+
+  // Myra's bubble pops in later
+  setTimeout(() => document.getElementById("myra-bubble").classList.add("show"), 1500);
 
   // Avatar picker
   let selectedAvatar = "star_princess";
@@ -428,7 +414,6 @@
   AVATARS.forEach(av => {
     const div = document.createElement("div");
     div.className = "avatar-option" + (av.id === selectedAvatar ? " selected" : "");
-    div.dataset.id = av.id;
     div.style.background = av.gradient;
     div.innerHTML = `<span class="av-emoji">${av.emoji}</span><span class="av-label">${av.label}</span>`;
     div.addEventListener("click", () => {
@@ -441,61 +426,49 @@
 
   // Redirect if already logged in
   (async () => {
-    const session = await getSession();
-    if (session) window.location.href = "pages/dashboard.html";
+    const s = await getSession();
+    if (s) window.location.href = "pages/dashboard.html";
   })();
 
-  window.showTab = function(tab) {
-    document.getElementById("form-login").classList.toggle("hidden", tab !== "login");
-    document.getElementById("form-register").classList.toggle("hidden", tab !== "register");
-    document.getElementById("tab-login").classList.toggle("active", tab === "login");
-    document.getElementById("tab-register").classList.toggle("active", tab === "register");
+  window.showTab = t => {
+    document.getElementById("form-login").classList.toggle("hidden", t !== "login");
+    document.getElementById("form-register").classList.toggle("hidden", t !== "register");
+    document.getElementById("tab-login").classList.toggle("active", t === "login");
+    document.getElementById("tab-register").classList.toggle("active", t === "register");
     document.getElementById("login-error").textContent = "";
     document.getElementById("reg-error").textContent = "";
   };
 
-  window.doLogin = async function() {
-    const username = document.getElementById("login-username").value.trim();
-    const password = document.getElementById("login-password").value;
-    const errEl = document.getElementById("login-error");
-    const btn   = document.getElementById("login-btn");
-    if (!username || !password) { errEl.textContent = "Please fill in both fields! 🌸"; return; }
-    btn.disabled = true; btn.textContent = "Opening your world... ✨";
-    errEl.textContent = "";
-    try {
-      await login({ username, password });
-      window.location.href = "pages/dashboard.html";
-    } catch {
-      errEl.textContent = "Hmm, wrong username or password. Try again! 💜";
-      btn.disabled = false; btn.innerHTML = "🚀 Enter My World!";
-    }
+  window.doLogin = async () => {
+    const u = document.getElementById("login-username").value.trim();
+    const p = document.getElementById("login-password").value;
+    const e = document.getElementById("login-error");
+    const b = document.getElementById("login-btn");
+    if (!u||!p){e.textContent="Please fill in both fields! 🌸";return;}
+    b.disabled=true; b.textContent="Opening your world... ✨"; e.textContent="";
+    try { await login({username:u,password:p}); window.location.href="pages/dashboard.html"; }
+    catch { e.textContent="Wrong username or password. Try again! 💜"; b.disabled=false; b.innerHTML="🚀 Enter Our World!"; }
   };
 
-  window.doRegister = async function() {
-    const displayName = document.getElementById("reg-name").value.trim();
-    const username    = document.getElementById("reg-username").value.trim().toLowerCase();
-    const gradeId     = Number(document.getElementById("reg-grade").value);
-    const password    = document.getElementById("reg-password").value;
-    const errEl       = document.getElementById("reg-error");
-    const btn         = document.getElementById("reg-btn");
-    if (!displayName) { errEl.textContent = "Please enter your name! 🌸"; return; }
-    if (!username || !/^[a-z0-9_]+$/.test(username)) { errEl.textContent = "Username: letters, numbers and _ only! No spaces."; return; }
-    if (!gradeId) { errEl.textContent = "Please select your grade! 📚"; return; }
-    if (password.length < 6) { errEl.textContent = "Password must be at least 6 characters! 🔒"; return; }
-    btn.disabled = true; btn.textContent = "Creating your world... 🌟";
-    errEl.textContent = "";
-    try {
-      await register({ username, displayName, password, gradeId, avatarType: selectedAvatar });
-      window.location.href = "pages/dashboard.html";
-    } catch (err) {
-      errEl.textContent = err.message?.includes("already") ? "That username is taken! Try another one 💜" : "Something went wrong. Try again! 💜";
-      btn.disabled = false; btn.innerHTML = "🌟 Create My Account!";
-    }
+  window.doRegister = async () => {
+    const n=document.getElementById("reg-name").value.trim();
+    const u=document.getElementById("reg-username").value.trim().toLowerCase();
+    const g=Number(document.getElementById("reg-grade").value);
+    const p=document.getElementById("reg-password").value;
+    const e=document.getElementById("reg-error");
+    const b=document.getElementById("reg-btn");
+    if(!n){e.textContent="Please enter your name! 🌸";return;}
+    if(!u||!/^[a-z0-9_]+$/.test(u)){e.textContent="Username: letters, numbers and _ only!";return;}
+    if(!g){e.textContent="Please select your grade! 📚";return;}
+    if(p.length<6){e.textContent="Password needs at least 6 characters! 🔒";return;}
+    b.disabled=true; b.textContent="Creating your world... 🌟"; e.textContent="";
+    try { await register({username:u,displayName:n,password:p,gradeId:g,avatarType:selectedAvatar}); window.location.href="pages/dashboard.html"; }
+    catch(err){ e.textContent=err.message?.includes("already")?"Username taken! Try another 💜":"Something went wrong. Try again! 💜"; b.disabled=false; b.innerHTML="🌟 Create My Account!"; }
   };
 
   document.addEventListener("keydown", e => {
-    if (e.key !== "Enter") return;
-    if (!document.getElementById("form-login").classList.contains("hidden")) window.doLogin();
+    if(e.key!=="Enter")return;
+    if(!document.getElementById("form-login").classList.contains("hidden")) window.doLogin();
     else window.doRegister();
   });
 </script>
