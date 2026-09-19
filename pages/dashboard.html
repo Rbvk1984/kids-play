@@ -111,7 +111,14 @@
       .from("kp_subjects").select("*").eq("active", true).order("sort_order");
 
     if (error || !data?.length) {
-      document.getElementById("subject-grid").innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-emoji">😅</div><div class="empty-state-text">No subjects yet — check back soon!</div></div>`;
+      document.getElementById("subject-grid").innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-emoji">📭</div>
+          <div class="empty-state-text">No subjects found yet!</div>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-top:8px; font-weight:700;">
+            Please ask your admin to run the seed SQL files (03_seed.sql and 04_questions.sql) in Supabase.
+          </p>
+        </div>`;
       return;
     }
 
