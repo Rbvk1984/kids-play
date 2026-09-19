@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kids Play — Results!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="page-center" style="flex-direction:column; gap:24px; padding:20px;">
+
+  <div class="results-card" id="results-card">
+    <div class="results-emoji" id="results-emoji">🎉</div>
+    <div class="results-title" id="results-title">Game Complete!</div>
+    <div class="results-subtitle" id="results-subtitle"></div>
+
+    <div class="stats-grid">
+      <div class="stat-block">
+        <div class="stat-value" id="r-score" style="color:var(--primary)">—</div>
+        <div class="stat-label">Score</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="r-correct" style="color:var(--correct)">—</div>
+        <div class="stat-label">Correct</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="r-accuracy" style="color:var(--info)">—</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="r-streak" style="color:var(--streak)">—</div>
+        <div class="stat-label">Best Streak 🔥</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="r-total" style="color:var(--text-muted)">—</div>
+        <div class="stat-label">Questions</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-value" id="r-wrong" style="color:var(--wrong)">—</div>
+        <div class="stat-label">Incorrect</div>
+      </div>
+    </div>
+
+    <!-- Performance message -->
+    <div id="performance-msg" style="background:var(--bg-muted); border-radius:var(--r-sm); padding:14px 16px; margin-bottom:20px; font-weight:700; font-size:0.95rem; border: 2px solid var(--border);"></div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary btn-full btn-lg" onclick="playAgain()">🔄 Play Again</button>
+      <button class="btn btn-success btn-full" onclick="window.location.href='dashboard.html'">📚 Try Another Topic</button>
+      <button class="btn btn-ghost btn-full" onclick="window.location.href='dashboard.html'">🏠 Back to Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { requireAuth } from "../js/guard.js";
+
+  (async () => {
+    await requireAuth();
+
+    const result = JSON.parse(sessionStorage.getItem("kp_result") || "null");
+    if (!result) { window.location.href = "dashboard.html"; return; }
+
+    // Fill in results
+    document.getElementById("r-score").textContent    = result.score;
+    document.getElementById("r-correct").textContent  = result.correct_count;
+    document.getElementById("r-accuracy").textContent = result.accuracy + "%";
+    document.getElementById("r-streak").textContent   = result.best_streak;
+    document.getElementById("r-total").textContent    = result.total_questions;
+    document.getElementById("r-wrong").textContent    = result.incorrect_count;
+
+    // Subject + topic badge
+    document.getElementById("results-subtitle").textContent =
+      `${result.subjectEmoji} ${result.subjectName} · ${result.topicName}`;
+
+    // Performance emoji + message
+    const acc = result.accuracy;
+    let emoji, title, msg;
+    if (acc === 100) {
+      emoji = "🏆"; title = "Perfect Score!";
+      msg   = "🌟 Amazing! You got every question right! You're a superstar!";
+    } else if (acc >= 80) {
+      emoji = "🎉"; title = "Excellent!";
+      msg   = "🔥 Great job! You really know your stuff. Keep practising!";
+    } else if (acc >= 60) {
+      emoji = "😊"; title = "Good Work!";
+      msg   = "👍 Not bad! Play again to beat your score!";
+    } else if (acc >= 40) {
+      emoji = "📖"; title = "Keep Practising!";
+      msg   = "💪 Don't give up! Read the explanations and try again!";
+    } else {
+      emoji = "🌱"; title = "Keep Going!";
+      msg   = "📚 Every expert was once a beginner. Try again — you'll improve!";
+    }
+
+    document.getElementById("results-emoji").textContent = emoji;
+    document.getElementById("results-title").textContent = title;
+    document.getElementById("performance-msg").textContent = msg;
+  })();
+
+  window.playAgain = function() {
+    // topic and subject are still in sessionStorage
+    window.location.href = "game.html";
+  };
+</script>
+</body>
+</html>

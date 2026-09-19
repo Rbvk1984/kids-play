@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kids Play — Playing!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<header class="kp-header">
+  <a href="dashboard.html" class="kp-logo" style="font-size:1.1rem;">🎮 Kids Play</a>
+  <div class="kp-header-right">
+    <span id="header-subject" style="font-weight:700; color:var(--primary); font-size:0.9rem;"></span>
+    <span style="color:var(--text-muted)">›</span>
+    <span id="header-topic" style="font-weight:700; font-size:0.9rem;"></span>
+    <button class="btn btn-ghost" style="padding:7px 14px; font-size:0.82rem;" onclick="if(confirm('Leave this game? Your progress will be lost.')) window.location.href='dashboard.html'">✕ Quit</button>
+  </div>
+</header>
+
+<div class="game-wrap">
+
+  <!-- Progress bar -->
+  <div class="game-progress-bar">
+    <div class="game-progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="game-stats">
+    <div class="game-stat">
+      <span class="stat-icon">❓</span>
+      <span id="stat-question">1 / 10</span>
+    </div>
+    <div class="game-stat">
+      <span class="stat-icon">⭐</span>
+      <span id="stat-score">0</span>
+    </div>
+    <div class="game-stat" id="streak-stat" style="display:none">
+      <span class="stat-icon">🔥</span>
+      <span id="stat-streak">0</span>
+    </div>
+    <div class="game-stat">
+      <span class="stat-icon">✅</span>
+      <span id="stat-correct">0</span>
+    </div>
+  </div>
+
+  <!-- Question card -->
+  <div class="question-card" id="question-card">
+    <div class="question-meta" id="q-meta">Question 1 of 10</div>
+    <div class="question-text" id="q-text">Loading question...</div>
+
+    <!-- MCQ Options -->
+    <div class="options-grid" id="options-grid"></div>
+
+    <!-- Feedback box (shown after answering) -->
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-body" id="feedback-body"></div>
+      <div class="feedback-explanation" id="feedback-explanation"></div>
+    </div>
+  </div>
+
+  <!-- Next button (shown after answering) -->
+  <button class="btn btn-primary btn-full btn-lg hidden" id="next-btn" onclick="nextQuestion()">
+    Next Question →
+  </button>
+
+  <!-- Loading / error state -->
+  <div class="empty-state hidden" id="load-state">
+    <div class="empty-state-emoji" id="load-emoji">⏳</div>
+    <div class="empty-state-text" id="load-text">Loading questions...</div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { requireAuth } from "../js/guard.js";
+  import { loadQuestions, checkAnswer, getCorrectOptionText } from "../js/engines/questionEngine.js";
+  import { calculatePoints, updateStreak, buildSessionResult, SCORING_CONFIG } from "../js/engines/scoringEngine.js";
+  import { saveSession, saveAnswers, updateProgress } from "../js/engines/progressEngine.js";
+
+  // ---- State ----
+  let profile      = null;
+  let topic        = null;
+  let subject      = null;
+  let questions    = [];
+  let current      = 0;
+  let score        = 0;
+  let streak       = 0;
+  let bestStreak   = 0;
+  let correctCount = 0;
+  let answers      = [];
+  let answered     = false;
+
+  // ---- Init ----
+  (async () => {
+    const auth = await requireAuth();
+    if (!auth) return;
+    profile = auth.profile;
+
+    topic   = JSON.parse(sessionStorage.getItem("kp_topic")   || "null");
+    subject = JSON.parse(sessionStorage.getItem("kp_subject") || "null");
+
+    if (!topic || !subject) {
+      window.location.href = "dashboard.html";
+      return;
+    }
+
+    document.getElementById("header-subject").textContent = subject.emoji + " " + subject.name;
+    document.getElementById("header-topic").textContent   = topic.name;
+
+    showState("loading");
+
+    try {
+      questions = await loadQuestions(topic.id, 10);
+      if (questions.length === 0) throw new Error("No questions found.");
+      hideState();
+      renderQuestion();
+    } catch (err) {
+      showState("error", "😅", err.message || "Could not load questions. Try again later.");
+    }
+  })();
+
+  // ---- Render question ----
+  function renderQuestion() {
+    const q   = questions[current];
+    const total = questions.length;
+
+    // Stats
+    document.getElementById("stat-question").textContent = `${current + 1} / ${total}`;
+    document.getElementById("stat-score").textContent    = score;
+    document.getElementById("stat-streak").textContent   = streak;
+    document.getElementById("streak-stat").style.display = streak >= 2 ? "flex" : "none";
+    document.getElementById("stat-correct").textContent  = correctCount;
+
+    // Progress bar
+    document.getElementById("progress-fill").style.width = `${(current / total) * 100}%`;
+
+    // Question text
+    document.getElementById("q-meta").textContent  = `Question ${current + 1} of ${total}`;
+    document.getElementById("q-text").textContent  = q.question_text;
+
+    // Reset feedback
+    const fb = document.getElementById("feedback-box");
+    fb.classList.remove("show","correct","wrong");
+    document.getElementById("next-btn").classList.add("hidden");
+    answered = false;
+
+    // Render options
+    const grid = document.getElementById("options-grid");
+    grid.innerHTML = "";
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.dataset.letter = opt.letter;
+      btn.innerHTML = `
+        <span class="option-letter">${opt.letter}</span>
+        <span class="option-text">${opt.option_text}</span>
+      `;
+      btn.addEventListener("click", () => handleAnswer(opt.letter));
+      grid.appendChild(btn);
+    });
+  }
+
+  // ---- Handle answer ----
+  function handleAnswer(selectedLetter) {
+    if (answered) return;
+    answered = true;
+
+    const q         = questions[current];
+    const isCorrect = checkAnswer(q, selectedLetter);
+    const newStreak = updateStreak(isCorrect, streak);
+    const points    = calculatePoints(isCorrect, newStreak);
+
+    streak = newStreak;
+    if (streak > bestStreak) bestStreak = streak;
+    score += points;
+    if (isCorrect) correctCount++;
+
+    answers.push({
+      questionId:    q.id,
+      playerAnswer:  selectedLetter,
+      isCorrect,
+      pointsEarned:  points,
+    });
+
+    // Style option buttons
+    const grid = document.getElementById("options-grid");
+    grid.querySelectorAll(".option-btn").forEach(btn => {
+      btn.disabled = true;
+      const letter = btn.dataset.letter;
+      if (letter === q.correct_answer) btn.classList.add("correct");
+      else if (letter === selectedLetter && !isCorrect) btn.classList.add("wrong");
+    });
+
+    // Score pop animation
+    if (isCorrect && points > 0) {
+      showScorePop(`+${points}`);
+    }
+
+    // Show feedback
+    showFeedback(q, selectedLetter, isCorrect, points, newStreak);
+
+    // Update stats
+    document.getElementById("stat-score").textContent   = score;
+    document.getElementById("stat-streak").textContent  = streak;
+    document.getElementById("streak-stat").style.display = streak >= 2 ? "flex" : "none";
+    document.getElementById("stat-correct").textContent = correctCount;
+
+    // Show next button
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.classList.remove("hidden");
+    nextBtn.textContent = current + 1 >= questions.length ? "🏆 See Results!" : "Next Question →";
+  }
+
+  // ---- Feedback display ----
+  function showFeedback(q, selectedLetter, isCorrect, points, newStreak) {
+    const fb    = document.getElementById("feedback-box");
+    const title = document.getElementById("feedback-title");
+    const body  = document.getElementById("feedback-body");
+    const expl  = document.getElementById("feedback-explanation");
+
+    fb.classList.remove("correct","wrong");
+    fb.classList.add("show", isCorrect ? "correct" : "wrong");
+
+    if (isCorrect) {
+      title.className = "feedback-title correct";
+      const streakMsg = newStreak >= 3 ? ` · 🔥 ${newStreak} in a row!` : "";
+      title.innerHTML = `✅ Correct! <span style="font-size:0.85rem; font-weight:700;">+${points} pts${streakMsg}</span>`;
+      body.textContent = "";
+    } else {
+      title.className = "feedback-title wrong";
+      title.textContent = "❌ Not quite!";
+      const correctText = getCorrectOptionText(q);
+      body.innerHTML = `
+        <div>Your answer: <strong>${selectedLetter}) ${q.options.find(o=>o.letter===selectedLetter)?.option_text || selectedLetter}</strong></div>
+        <div>Correct answer: <strong style="color:var(--correct)">${q.correct_answer}) ${correctText}</strong></div>
+      `;
+    }
+
+    expl.textContent = "💡 " + q.explanation;
+  }
+
+  // ---- Next question ----
+  window.nextQuestion = async function() {
+    current++;
+    if (current >= questions.length) {
+      await finishGame();
+    } else {
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // ---- Finish game ----
+  async function finishGame() {
+    const result = buildSessionResult({ score, correctCount, incorrectCount: current - correctCount, bestStreak });
+
+    // Save to Supabase
+    try {
+      const session = await saveSession({ playerId: profile.id, topicId: topic.id, result });
+      if (session) {
+        await saveAnswers(session.id, answers);
+        await updateProgress({
+          playerId:  profile.id,
+          subjectId: subject.id,
+          topicId:   topic.id,
+          result,
+        });
+      }
+    } catch (err) {
+      console.warn("Could not save session:", err);
+    }
+
+    // Pass result to results page
+    sessionStorage.setItem("kp_result", JSON.stringify({
+      ...result,
+      topicName:   topic.name,
+      subjectName: subject.name,
+      subjectEmoji: subject.emoji,
+    }));
+    window.location.href = "results.html";
+  };
+
+  // ---- Score pop ----
+  function showScorePop(text) {
+    const el = document.createElement("div");
+    el.className = "score-pop";
+    el.textContent = text;
+    el.style.cssText = `left:${40 + Math.random()*20}%; bottom:${30 + Math.random()*15}%;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1050);
+  }
+
+  // ---- Loading state ----
+  function showState(type, emoji, text) {
+    document.getElementById("question-card").classList.add("hidden");
+    const el = document.getElementById("load-state");
+    el.classList.remove("hidden");
+    if (type === "loading") {
+      document.getElementById("load-emoji").textContent = "⏳";
+      document.getElementById("load-text").textContent  = "Loading questions...";
+    } else {
+      document.getElementById("load-emoji").textContent = emoji || "😅";
+      document.getElementById("load-text").textContent  = text || "Something went wrong.";
+    }
+  }
+  function hideState() {
+    document.getElementById("question-card").classList.remove("hidden");
+    document.getElementById("load-state").classList.add("hidden");
+  }
+</script>
+</body>
+</html>

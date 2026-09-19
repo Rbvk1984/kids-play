@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kids Play — Choose a Subject</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<header class="kp-header">
+  <a href="dashboard.html" class="kp-logo">🎮 Kids<span class="logo-dot">Play</span></a>
+  <div class="kp-header-right">
+    <div class="kp-avatar" id="header-avatar">?</div>
+    <span class="kp-username" id="header-name">Loading...</span>
+    <button class="btn btn-ghost" style="padding:8px 14px; font-size:0.85rem;" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- Welcome banner -->
+  <div style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff; border-radius: var(--r); padding: 20px 24px; margin-bottom: 28px; display:flex; align-items:center; gap:16px; box-shadow: var(--shadow-lg);">
+    <div style="font-size:2.8rem;" id="welcome-emoji">👋</div>
+    <div>
+      <div style="font-size:1.3rem; font-weight:900;" id="welcome-text">Hi there!</div>
+      <div style="font-size:0.9rem; opacity:0.85;" id="welcome-grade">Loading your profile...</div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+      <div style="font-size:1.6rem; font-weight:900;" id="total-score">0</div>
+      <div style="font-size:0.75rem; opacity:0.8;">Total Points ⭐</div>
+    </div>
+  </div>
+
+  <!-- Subject selection -->
+  <div id="subject-section">
+    <div class="section-title">📚 Choose a Subject</div>
+    <div class="section-sub">Pick a subject to start learning and earning points!</div>
+    <div class="subject-grid" id="subject-grid">
+      <div class="empty-state"><div class="empty-state-emoji">⏳</div><div class="empty-state-text">Loading subjects...</div></div>
+    </div>
+  </div>
+
+  <!-- Topic selection (shown after subject is picked) -->
+  <div id="topic-section" class="hidden">
+    <div class="breadcrumb">
+      <a href="dashboard.html" style="color:var(--text-muted); text-decoration:none;">Home</a>
+      <span class="sep">›</span>
+      <span id="breadcrumb-subject"></span>
+    </div>
+    <div class="section-title" id="topic-heading"></div>
+    <div class="section-sub">Choose a topic to play!</div>
+    <div class="topic-list" id="topic-list">
+      <div class="empty-state"><div class="empty-state-emoji">⏳</div><div class="empty-state-text">Loading topics...</div></div>
+    </div>
+    <button class="btn btn-ghost mt-4" onclick="showSubjects()">← Back to Subjects</button>
+  </div>
+
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from "../js/guard.js";
+  import { logout as authLogout } from "../js/auth.js";
+  import { supabase } from "../js/supabase.js";
+
+  let profile = null;
+  let selectedSubject = null;
+
+  (async () => {
+    const auth = await requireAuth();
+    if (!auth) return;
+    profile = auth.profile;
+
+    // Header
+    const avatar = document.getElementById("header-avatar");
+    avatar.textContent = profile.display_name[0].toUpperCase();
+    avatar.style.background = profile.avatar_color || "#6c5ce7";
+    document.getElementById("header-name").textContent = profile.display_name;
+    document.getElementById("total-score").textContent = (profile.total_score || 0).toLocaleString();
+
+    // Welcome banner
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    document.getElementById("welcome-text").textContent = `${greet}, ${profile.display_name}! 🌟`;
+    document.getElementById("welcome-grade").textContent = `${profile.kp_grades?.name || ""} · Let's learn something new today!`;
+
+    await loadSubjects();
+  })();
+
+  async function loadSubjects() {
+    const { data, error } = await supabase
+      .from("kp_subjects")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order");
+
+    if (error || !data?.length) {
+      document.getElementById("subject-grid").innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-emoji">😅</div>
+          <div class="empty-state-text">No subjects available yet. Check back soon!</div>
+        </div>`;
+      return;
+    }
+
+    const grid = document.getElementById("subject-grid");
+    grid.innerHTML = "";
+    data.forEach(subject => {
+      const card = document.createElement("div");
+      card.className = "subject-card";
+      card.style.setProperty("--subject-color", subject.color);
+      card.innerHTML = `
+        <div class="subject-emoji">${subject.emoji}</div>
+        <div class="subject-name">${subject.name}</div>
+      `;
+      card.addEventListener("click", () => selectSubject(subject));
+      grid.appendChild(card);
+    });
+  }
+
+  async function selectSubject(subject) {
+    selectedSubject = subject;
+    document.getElementById("breadcrumb-subject").textContent = subject.name;
+    document.getElementById("topic-heading").textContent = `${subject.emoji} ${subject.name} Topics`;
+    document.getElementById("subject-section").classList.add("hidden");
+    document.getElementById("topic-section").classList.remove("hidden");
+
+    const { data, error } = await supabase
+      .from("kp_topics")
+      .select("*")
+      .eq("subject_id", subject.id)
+      .eq("grade_id", profile.grade_id)
+      .eq("active", true)
+      .order("sort_order");
+
+    const list = document.getElementById("topic-list");
+    if (error || !data?.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-emoji">📭</div><div class="empty-state-text">No topics for your grade yet. More coming soon!</div></div>`;
+      return;
+    }
+
+    list.innerHTML = "";
+    data.forEach(topic => {
+      const card = document.createElement("div");
+      card.className = "topic-card";
+      card.innerHTML = `
+        <div class="topic-icon" style="background:${subject.color}22; color:${subject.color}">
+          ${subject.emoji}
+        </div>
+        <div class="topic-info">
+          <div class="topic-name">${topic.name}</div>
+          ${topic.description ? `<div class="topic-desc">${topic.description}</div>` : ""}
+        </div>
+        <div class="topic-arrow">›</div>
+      `;
+      card.addEventListener("click", () => startGame(topic, subject));
+      list.appendChild(card);
+    });
+  }
+
+  function startGame(topic, subject) {
+    sessionStorage.setItem("kp_topic",   JSON.stringify(topic));
+    sessionStorage.setItem("kp_subject", JSON.stringify(subject));
+    window.location.href = "game.html";
+  }
+
+  window.showSubjects = function() {
+    document.getElementById("subject-section").classList.remove("hidden");
+    document.getElementById("topic-section").classList.add("hidden");
+  };
+
+  window.doLogout = async function() {
+    await authLogout();
+  };
+</script>
+</body>
+</html>
